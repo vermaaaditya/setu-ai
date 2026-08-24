@@ -19,21 +19,25 @@ export async function generateDispatch(
       : `चेतावनी। जल स्तर ${surgeHeight} मीटर है। ${strandedPop} लोग फंसे हैं। बचाव दल तुरंत भेजें।`;
   }
 
-  const prompt = `Write a short 2-sentence military dispatch alert for flood surge ${surgeHeight} meters with ${strandedPop} stranded people.
-  Language: ${lang === 'hi-IN' ? 'Pure Hindi' : 'English'}.
-  CRITICAL RULES:
-  1. DO NOT use markdown formatting like asterisks (**), hashtags, or quotes.
-  2. Maximum 2 short, crisp spoken sentences.
-  3. No yapping, greetings, or explanations. Plain text only.`;
-
   try {
     const response = await groq.chat.completions.create({
-      messages: [{ role: 'user', content: prompt }],
+      messages: [
+        {
+          role: 'system',
+          content: 'You are an automated NDRF emergency radio dispatcher. Output ONLY the exact final broadcast text to be spoken over the radio. Maximum 2 short sentences. Absolutely NO preambles, NO markdown, NO asterisks, NO quotes, NO rules, and NO explanations.'
+        },
+        {
+          role: 'user',
+          content: `Broadcast language: ${lang === 'hi-IN' ? 'Hindi' : 'English'}. Current flood surge: ${surgeHeight} meters. Estimated stranded population: ${strandedPop}.`
+        }
+      ],
       model: 'qwen/qwen3.6-27b',
     });
-    const raw = response.choices[0]?.message?.content || 'Dispatch generated.';
-    // Strip any markdown asterisks or special symbols so TTS does not read them out
-    return raw.replace(/[*#_~`"']/g, '').trim();
+    let raw = response.choices[0]?.message?.content || 'Dispatch generated.';
+    // Clean all markdown, quotes, and common LLM preamble prefixes
+    raw = raw.replace(/[*#_~`"']/g, '');
+    raw = raw.replace(/^(here is|dispatch|alert|broadcast|warning|note|critical rules):?/gi, '');
+    return raw.trim();
   } catch (error) {
     console.error("Groq API Error:", error);
     return 'Error generating dispatch with Groq.';
