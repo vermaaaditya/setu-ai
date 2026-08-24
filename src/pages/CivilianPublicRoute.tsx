@@ -44,6 +44,7 @@ const CivilianPublicRoute: React.FC = () => {
   const [needsMedical, setNeedsMedical] = useState(false);
   const [sosSent, setSosSent] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [dismissedCellBroadcast, setDismissedCellBroadcast] = useState(false);
 
   const handleSendSOS = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,6 +74,11 @@ const CivilianPublicRoute: React.FC = () => {
     ? "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
     : "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
 
+  // Pre-filled SMS payload to emergency number 112
+  const nativeSmsUrl = `sms:112?body=${encodeURIComponent(
+    `EMERGENCY SOS: Stranded flood party of ${partySize} at GPS (${pinPosition[0].toFixed(4)}, ${pinPosition[1].toFixed(4)}). Medical needed: ${needsMedical ? 'YES' : 'NO'}. Surge level: ${surgeHeight}m.`
+  )}`;
+
   return (
     <div style={{ 
       padding: '32px', 
@@ -82,6 +88,38 @@ const CivilianPublicRoute: React.FC = () => {
       height: '100%',
       overflowY: 'auto'
     }}>
+      
+      {/* AUTOMATIC GOVERNMENT EMERGENCY CELL BROADCAST BANNER (No phone number input required!) */}
+      {isHighRisk && !dismissedCellBroadcast && (
+        <div style={{
+          backgroundColor: '#B91C1C', color: '#FFFFFF', padding: '16px 24px',
+          borderRadius: '8px', marginBottom: '24px', border: '2px solid #EF4444',
+          boxShadow: '0 0 25px rgba(220, 38, 38, 0.6)',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <span style={{ fontSize: '32px' }}>📡</span>
+            <div>
+              <div style={{ fontWeight: '900', fontSize: '13px', letterSpacing: '0.1em', color: '#FECACA' }}>
+                GOVERNMENT EMERGENCY CELL BROADCAST (NDMA / SDMA)
+              </div>
+              <div style={{ fontSize: '15px', fontWeight: 'bold', margin: '2px 0' }}>
+                CRITICAL FLOOD SURGE WARNING (+{surgeHeight}M) IN YOUR CELL TOWER SECTOR
+              </div>
+              <div style={{ fontSize: '12px', opacity: 0.9 }}>
+                Automated cell broadcast pushed to all mobile devices in {activeBasin.name.split(':')[0]}. Move to designated high-ground shelters immediately.
+              </div>
+            </div>
+          </div>
+          <button 
+            onClick={() => setDismissedCellBroadcast(true)}
+            style={{ padding: '8px 16px', backgroundColor: '#000', color: '#FFF', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer', fontSize: '12px' }}
+          >
+            DISMISS ALERT
+          </button>
+        </div>
+      )}
+
       {/* Header */}
       <div style={{ marginBottom: '24px', borderBottom: '1px solid var(--grid-line)', paddingBottom: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -137,7 +175,7 @@ const CivilianPublicRoute: React.FC = () => {
               <div style={{ fontSize: '36px', marginBottom: '8px' }}>✅</div>
               <h3 style={{ margin: '0 0 8px 0', color: 'var(--responder-green)' }}>SOS SIGNAL TRANSMITTED</h3>
               <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-muted)' }}>
-                Your exact map pin ({pinPosition[0].toFixed(4)}, {pinPosition[1].toFixed(4)}) is now live on the NDRF HQ Map. Hold your position on high ground.
+                Your exact map pin ({pinPosition[0].toFixed(4)}, {pinPosition[1].toFixed(4)}) is live on the NDRF HQ Map. Hold your position on high ground.
               </p>
               <button 
                 onClick={() => setSosSent(false)}
@@ -162,7 +200,7 @@ const CivilianPublicRoute: React.FC = () => {
                 />
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 0' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 0' }}>
                 <input 
                   type="checkbox" 
                   id="med" 
@@ -197,6 +235,25 @@ const CivilianPublicRoute: React.FC = () => {
               >
                 {isSubmitting ? 'TRANSMITTING GPS SIGNAL...' : '🚨 BROADCAST EMERGENCY SOS TO NDRF'}
               </button>
+
+              {/* 1-TAP NATIVE PHONE EMERGENCY SMS LINK */}
+              <a 
+                href={nativeSmsUrl}
+                style={{
+                  display: 'block',
+                  textAlign: 'center',
+                  padding: '12px',
+                  backgroundColor: 'transparent',
+                  border: '1px solid var(--safe-cyan)',
+                  color: 'var(--safe-cyan)',
+                  textDecoration: 'none',
+                  borderRadius: '6px',
+                  fontWeight: 'bold',
+                  fontSize: '13px'
+                }}
+              >
+                💬 SEND PRE-FILLED SMS TO 112 (OFFLINE CELLULAR)
+              </a>
             </form>
           )}
         </div>
