@@ -1,6 +1,5 @@
 import type { FeatureCollection, Polygon } from 'geojson';
 import brahmaputraRoads from './realRoads.json';
-import keralaRoads from './realRoads_kerala.json';
 import sutlejRoads from './realRoads_sutlej.json';
 import gangesRoads from './realRoads_ganges.json';
 
@@ -18,7 +17,6 @@ export interface BasinConfig {
   populationData: FeatureCollection;
 }
 
-// Helper to generate clean, oriented river flood contour tiers (2m, 5m, 8m) directly over breach point
 function generateRiverElevationPolygons(
   breachLat: number, 
   breachLng: number, 
@@ -95,17 +93,6 @@ export const basinRegistry: Record<string, BasinConfig> = {
     roads: brahmaputraRoads as any,
     populationData: generateMockPopulation([26.75, 94.00, 26.95, 94.25]),
     elevationPolygons: generateRiverElevationPolygons(26.90, 94.08, 'HORIZONTAL')
-  },
-  kerala: {
-    id: 'kerala',
-    name: 'Kerala: Periyar Overflow',
-    center: [10.10, 76.30],
-    zoom: 12,
-    breachPoint: [10.12, 76.25],
-    safeCampPoint: [10.05, 76.35],
-    roads: keralaRoads as any,
-    populationData: generateMockPopulation([10.00, 76.20, 10.20, 76.40]),
-    elevationPolygons: generateRiverElevationPolygons(10.12, 76.25, 'HORIZONTAL')
   },
   sutlej: {
     id: 'sutlej',
