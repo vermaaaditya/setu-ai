@@ -34,7 +34,7 @@
   height: 12px;
   border-radius: 50%;
   border: 2px solid var(--threat-amber);
-  animation: sweep 1s ease-out forwards;
+  animation: sweep 2.5s cubic-bezier(0, 0.2, 0.8, 1) infinite;
   z-index: 1;
 }
 
@@ -73,7 +73,7 @@
   height: 16px;
   transform: translate(-50%, -50%);
   border-radius: 50%;
-  animation: pingPulse 1s ease-out;
+  animation: pingPulse 2s cubic-bezier(0, 0.2, 0.8, 1) infinite;
 }
 .arrivalPin.safe::before { border: 2px solid var(--responder-green); }
 .arrivalPin.stranded::before { border: 2px solid var(--responder-red); }
