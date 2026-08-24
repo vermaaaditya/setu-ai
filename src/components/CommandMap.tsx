@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useState } from 'react';
+import React, { useMemo, useEffect, useState, useDeferredValue } from 'react';
 import { MapContainer, TileLayer, GeoJSON, Marker, Polyline, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -27,14 +27,17 @@ function MapRecenter({ center, zoom }: { center: [number, number], zoom: number 
 
 const CommandMap: React.FC<CommandMapProps> = ({ surgeHeight, pings = [], setStrandedPop, theme = 'dark', activeBasin }) => {
   const [animKey, setAnimKey] = useState(0);
+  
+  // React 18 Concurrent Rendering: Defer heavy 20,000-road GeoJSON spatial math to background frames
+  const deferredSurgeHeight = useDeferredValue(surgeHeight);
 
   useEffect(() => {
     setAnimKey(prev => prev + 1);
   }, [surgeHeight]);
 
   const { floodedPolygons, deadRoadIDs, estimatedStrandedPopulation } = useMemo(() => {
-    return calculateImpact(surgeHeight, activeBasin.elevationPolygons, activeBasin.roads as any, activeBasin.populationData as any);
-  }, [surgeHeight, activeBasin]);
+    return calculateImpact(deferredSurgeHeight, activeBasin.elevationPolygons, activeBasin.roads as any, activeBasin.populationData as any);
+  }, [deferredSurgeHeight, activeBasin]);
 
   // Update telemetry panel
   useEffect(() => {
