@@ -60,7 +60,7 @@ const CommandLayout: React.FC = () => {
       const unsub = onSnapshot(q, (snapshot) => {
         const loadedPings: ResponderPing[] = [];
         snapshot.forEach((doc) => {
-          loadedPings.push({ id: doc.id, ...doc.data() } as ResponderPing);
+          loadedPings.push({ ...doc.data(), id: doc.id } as ResponderPing);
         });
         setPings(loadedPings);
       });
@@ -150,7 +150,7 @@ const CommandLayout: React.FC = () => {
             {pings.map(ping => (
               <div key={ping.id} style={{ marginBottom: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
-                  [{new Date(ping.timestamp?.seconds * 1000).toLocaleTimeString() || 'LIVE'}] {ping.id}{' '}
+                  [{new Date(ping.timestamp?.seconds * 1000).toLocaleTimeString() || 'LIVE'}] {(ping as any).unitName || ping.id}{' '}
                   <span style={{ color: ping.status === 'SAFE' ? 'var(--responder-green)' : 'var(--responder-red)', fontWeight: 'bold' }}>
                     {ping.status}
                   </span>
