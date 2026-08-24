@@ -76,7 +76,7 @@ const CivilianPublicRoute: React.FC = () => {
   return (
     <div style={{ 
       padding: '32px', 
-      maxWidth: '1100px', 
+      maxWidth: '1400px', 
       margin: '0 auto', 
       color: 'var(--text-primary)',
       height: '100%',
@@ -98,18 +98,18 @@ const CivilianPublicRoute: React.FC = () => {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '24px' }}>
         
         {/* Interactive Pin Drop Map Card */}
-        <div style={{ backgroundColor: 'var(--bg-panel)', border: '1px solid var(--grid-line)', borderRadius: '8px', padding: '20px' }}>
+        <div style={{ backgroundColor: 'var(--bg-panel)', border: '1px solid var(--grid-line)', borderRadius: '8px', padding: '20px', display: 'flex', flexDirection: 'column' }}>
           <div style={{ fontSize: '12px', color: 'var(--safe-cyan)', fontWeight: 'bold', letterSpacing: '0.08em', marginBottom: '8px' }}>
             STEP 1: TAP MAP TO DROP YOUR EXACT SOS LOCATION
           </div>
-          <div style={{ height: '300px', borderRadius: '6px', overflow: 'hidden', border: '1px solid var(--grid-line)', marginBottom: '12px' }}>
+          <div style={{ height: '480px', borderRadius: '6px', overflow: 'hidden', border: '1px solid var(--grid-line)', marginBottom: '12px', flex: 1 }}>
             <MapContainer center={activeBasin.center} zoom={activeBasin.zoom} style={{ height: '100%', width: '100%' }} zoomControl={true}>
               <TileLayer url={tileUrl} />
               <LocationMarker position={pinPosition} setPosition={setPinPosition} />
             </MapContainer>
           </div>
           <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
-            SELECTED GPS: <span style={{ color: 'var(--text-primary)' }}>{pinPosition[0].toFixed(4)}, {pinPosition[1].toFixed(4)}</span>
+            SELECTED GPS: <span style={{ color: 'var(--text-primary)', fontWeight: 'bold' }}>{pinPosition[0].toFixed(4)}, {pinPosition[1].toFixed(4)}</span>
           </div>
         </div>
 
