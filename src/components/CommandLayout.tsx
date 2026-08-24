@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import { doc, onSnapshot, collection, query, orderBy, limit } from 'firebase/firestore';
+import { doc, onSnapshot, collection, query, orderBy, limit, deleteDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { generateDispatch, speakText, generateManifestPDF } from '../lib/aiDispatcher';
 import { basinRegistry } from '../data/basinRegistry';
@@ -22,6 +22,15 @@ const CommandLayout: React.FC = () => {
   const [isDispatching, setIsDispatching] = useState(false);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [selectedBasinId, setSelectedBasinId] = useState('brahmaputra');
+
+  const handleResolvePing = async (pingId: string) => {
+    try {
+      await deleteDoc(doc(db, 'responderStatus', pingId));
+    } catch (e) {
+      console.warn("Firebase delete failed. Removing locally.");
+      setPings(prev => prev.filter(p => p.id !== pingId));
+    }
+  };
 
   const handleDispatch = async () => {
     setIsDispatching(true);
@@ -139,11 +148,20 @@ const CommandLayout: React.FC = () => {
           <div className="data-value" style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
             {pings.length === 0 ? "Listening for field pings..." : null}
             {pings.map(ping => (
-              <div key={ping.id} style={{ marginBottom: '8px' }}>
-                [{new Date(ping.timestamp?.seconds * 1000).toLocaleTimeString() || 'LIVE'}] {ping.id}{' '}
-                <span style={{ color: ping.status === 'SAFE' ? 'var(--responder-green)' : 'var(--responder-red)' }}>
-                  {ping.status}
-                </span>
+              <div key={ping.id} style={{ marginBottom: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  [{new Date(ping.timestamp?.seconds * 1000).toLocaleTimeString() || 'LIVE'}] {ping.id}{' '}
+                  <span style={{ color: ping.status === 'SAFE' ? 'var(--responder-green)' : 'var(--responder-red)', fontWeight: 'bold' }}>
+                    {ping.status}
+                  </span>
+                </div>
+                <button 
+                  onClick={() => handleResolvePing(ping.id)}
+                  style={{ padding: '2px 6px', backgroundColor: 'rgba(52, 211, 153, 0.15)', color: 'var(--responder-green)', border: '1px solid var(--responder-green)', borderRadius: '3px', cursor: 'pointer', fontSize: '10px', fontWeight: 'bold' }}
+                  title="Mark Rescued / Clear Signal"
+                >
+                  RESOLVED ✓
+                </button>
               </div>
             ))}
           </div>

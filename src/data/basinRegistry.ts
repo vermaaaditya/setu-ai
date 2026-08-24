@@ -17,67 +17,38 @@ export interface BasinConfig {
   populationData: FeatureCollection;
 }
 
-function generateRiverElevationPolygons(
-  breachLat: number, 
-  breachLng: number, 
-  orientation: 'HORIZONTAL' | 'VERTICAL' = 'HORIZONTAL'
-): FeatureCollection<Polygon> {
-  const isVert = orientation === 'VERTICAL';
-  
-  const dLng1 = isVert ? 0.025 : 0.06;
-  const dLat1 = isVert ? 0.06 : 0.025;
+// Universal Radial Flood Inundation Generator (Concentric circles around breach origin)
+// 100% orientation-independent, mathematically smooth, fits any river/dam breach scenario!
+function generateConcentricFloodPolygons(breachLat: number, breachLng: number): FeatureCollection<Polygon> {
+  const createCirclePolygon = (radiusKm: number, elevation: number) => {
+    const points = 32;
+    const coords: [number, number][] = [];
+    const kmPerDegreeLat = 111;
+    const kmPerDegreeLng = 111 * Math.cos((breachLat * Math.PI) / 180);
 
-  const dLng2 = isVert ? 0.045 : 0.10;
-  const dLat2 = isVert ? 0.10 : 0.045;
+    for (let i = 0; i <= points; i++) {
+      const theta = (i / points) * (2 * Math.PI);
+      const latOffset = (radiusKm / kmPerDegreeLat) * Math.sin(theta);
+      const lngOffset = (radiusKm / kmPerDegreeLng) * Math.cos(theta);
+      coords.push([breachLng + lngOffset, breachLat + latOffset]);
+    }
 
-  const dLng3 = isVert ? 0.07 : 0.14;
-  const dLat3 = isVert ? 0.14 : 0.07;
+    return {
+      type: 'Feature' as const,
+      properties: { elevation },
+      geometry: {
+        type: 'Polygon' as const,
+        coordinates: [coords]
+      }
+    };
+  };
 
   return {
     type: 'FeatureCollection',
     features: [
-      {
-        type: 'Feature',
-        properties: { elevation: 2 },
-        geometry: {
-          type: 'Polygon',
-          coordinates: [[
-            [breachLng - dLng1, breachLat - dLat1],
-            [breachLng + dLng1, breachLat - dLat1],
-            [breachLng + dLng1, breachLat + dLat1],
-            [breachLng - dLng1, breachLat + dLat1],
-            [breachLng - dLng1, breachLat - dLat1]
-          ]]
-        }
-      },
-      {
-        type: 'Feature',
-        properties: { elevation: 5 },
-        geometry: {
-          type: 'Polygon',
-          coordinates: [[
-            [breachLng - dLng2, breachLat - dLat2],
-            [breachLng + dLng2, breachLat - dLat2],
-            [breachLng + dLng2, breachLat + dLat2],
-            [breachLng - dLng2, breachLat + dLat2],
-            [breachLng - dLng2, breachLat - dLat2]
-          ]]
-        }
-      },
-      {
-        type: 'Feature',
-        properties: { elevation: 8 },
-        geometry: {
-          type: 'Polygon',
-          coordinates: [[
-            [breachLng - dLng3, breachLat - dLat3],
-            [breachLng + dLng3, breachLat - dLat3],
-            [breachLng + dLng3, breachLat + dLat3],
-            [breachLng - dLng3, breachLat + dLat3],
-            [breachLng - dLng3, breachLat - dLat3]
-          ]]
-        }
-      }
+      createCirclePolygon(2.0, 2), // 2m surge: 2.0 km radius
+      createCirclePolygon(4.5, 5), // 5m surge: 4.5 km radius
+      createCirclePolygon(7.5, 8)  // 8m surge: 7.5 km radius
     ]
   };
 }
@@ -92,7 +63,7 @@ export const basinRegistry: Record<string, BasinConfig> = {
     safeCampPoint: [26.80, 94.20],
     roads: brahmaputraRoads as any,
     populationData: generateMockPopulation([26.75, 94.00, 26.95, 94.25]),
-    elevationPolygons: generateRiverElevationPolygons(26.90, 94.08, 'HORIZONTAL')
+    elevationPolygons: generateConcentricFloodPolygons(26.90, 94.08)
   },
   sutlej: {
     id: 'sutlej',
@@ -103,7 +74,7 @@ export const basinRegistry: Record<string, BasinConfig> = {
     safeCampPoint: [30.90, 75.90],
     roads: sutlejRoads as any,
     populationData: generateMockPopulation([30.90, 75.75, 31.05, 75.95]),
-    elevationPolygons: generateRiverElevationPolygons(31.02, 75.80, 'HORIZONTAL')
+    elevationPolygons: generateConcentricFloodPolygons(31.02, 75.80)
   },
   ganges: {
     id: 'ganges',
@@ -114,6 +85,6 @@ export const basinRegistry: Record<string, BasinConfig> = {
     safeCampPoint: [29.91, 78.20],
     roads: gangesRoads as any,
     populationData: generateMockPopulation([29.90, 78.10, 30.00, 78.20]),
-    elevationPolygons: generateRiverElevationPolygons(29.98, 78.12, 'VERTICAL')
+    elevationPolygons: generateConcentricFloodPolygons(29.98, 78.12)
   }
 };
