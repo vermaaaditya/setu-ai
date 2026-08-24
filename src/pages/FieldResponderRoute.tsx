@@ -51,19 +51,20 @@ const FieldResponderRoute: React.FC = () => {
         position: 'absolute', bottom: 40, left: '50%', transform: 'translateX(-50%)',
         zIndex: 1000, display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center',
         backgroundColor: 'var(--bg-panel)', padding: '16px', borderRadius: '8px',
-        border: '1px solid var(--grid-line)', width: '90%', maxWidth: '400px'
+        border: '1px solid var(--grid-line)', width: '90%', maxWidth: '440px',
+        boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
       }}>
         <button 
           onClick={() => sendPing('SAFE')}
-          style={{ backgroundColor: 'var(--responder-green)', color: '#000', border: 'none', padding: '12px 24px', fontWeight: 'bold', cursor: 'pointer', borderRadius: '4px' }}
+          style={{ backgroundColor: 'var(--responder-green)', color: '#000', border: 'none', padding: '14px 28px', fontWeight: '900', cursor: 'pointer', borderRadius: '6px', fontSize: '15px', letterSpacing: '0.05em' }}
         >
-          MARK SAFE
+          🟢 MARK SAFE
         </button>
         <button 
           onClick={() => sendPing('STRANDED')}
-          style={{ backgroundColor: 'var(--responder-red)', color: '#fff', border: 'none', padding: '12px 24px', fontWeight: 'bold', cursor: 'pointer', borderRadius: '4px' }}
+          style={{ backgroundColor: 'var(--responder-red)', color: '#fff', border: 'none', padding: '14px 28px', fontWeight: '900', cursor: 'pointer', borderRadius: '6px', fontSize: '15px', letterSpacing: '0.05em' }}
         >
-          MARK STRANDED
+          🔴 MARK STRANDED
         </button>
       </div>
     </div>

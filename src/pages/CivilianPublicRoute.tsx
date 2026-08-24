@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { basinRegistry } from '../data/basinRegistry';
@@ -10,10 +13,33 @@ interface ContextType {
   selectedBasinId: string;
 }
 
+// Component to handle map clicks and drop pin
+function LocationMarker({ position, setPosition }: { position: [number, number], setPosition: (pos: [number, number]) => void }) {
+  useMapEvents({
+    click(e) {
+      setPosition([e.latlng.lat, e.latlng.lng]);
+    },
+  });
+
+  const pinIcon = new L.DivIcon({
+    className: '',
+    html: `<div style="background-color: #FF4D4D; width: 24px; height: 24px; border-radius: 50%; border: 3px solid #FFF; box-shadow: 0 0 15px #FF4D4D; animation: pulse 1.5s infinite;"></div>`,
+    iconSize: [24, 24],
+    iconAnchor: [12, 12]
+  });
+
+  return position === null ? null : (
+    <Marker position={position} icon={pinIcon}>
+      <Popup>Your Selected SOS Location</Popup>
+    </Marker>
+  );
+}
+
 const CivilianPublicRoute: React.FC = () => {
-  const { surgeHeight, selectedBasinId } = useOutletContext<ContextType>();
+  const { surgeHeight, selectedBasinId, theme } = useOutletContext<ContextType>();
   const activeBasin = basinRegistry[selectedBasinId] || basinRegistry['brahmaputra'];
 
+  const [pinPosition, setPinPosition] = useState<[number, number]>(activeBasin.center);
   const [partySize, setPartySize] = useState(2);
   const [needsMedical, setNeedsMedical] = useState(false);
   const [sosSent, setSosSent] = useState(false);
@@ -28,14 +54,13 @@ const CivilianPublicRoute: React.FC = () => {
         status: 'STRANDED',
         partySize,
         needsMedical,
-        lat: activeBasin.center[0] + (Math.random() - 0.5) * 0.03,
-        lng: activeBasin.center[1] + (Math.random() - 0.5) * 0.03,
+        lat: pinPosition[0],
+        lng: pinPosition[1],
         timestamp: serverTimestamp()
       });
       setSosSent(true);
     } catch (err) {
       console.error("Firebase write failed:", err);
-      // Fallback local acknowledgement
       setSosSent(true);
     } finally {
       setIsSubmitting(false);
@@ -44,42 +69,62 @@ const CivilianPublicRoute: React.FC = () => {
 
   const isHighRisk = surgeHeight >= 5;
 
+  const tileUrl = theme === 'light' 
+    ? "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+    : "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
+
   return (
     <div style={{ 
       padding: '32px', 
-      maxWidth: '1000px', 
+      maxWidth: '1100px', 
       margin: '0 auto', 
       color: 'var(--text-primary)',
       height: '100%',
       overflowY: 'auto'
     }}>
       {/* Header */}
-      <div style={{ marginBottom: '32px', borderBottom: '1px solid var(--grid-line)', paddingBottom: '16px' }}>
+      <div style={{ marginBottom: '24px', borderBottom: '1px solid var(--grid-line)', paddingBottom: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <span style={{ fontSize: '24px' }}>🇮🇳</span>
+          <span style={{ fontSize: '28px' }}>🇮🇳</span>
           <div>
             <h1 style={{ margin: 0, fontSize: '24px', letterSpacing: '0.05em' }}>NDRF CITIZEN EMERGENCY SOS PORTAL</h1>
             <p style={{ margin: '4px 0 0 0', color: 'var(--text-muted)', fontSize: '14px' }}>
-              Public Assistance Channel • Active Region: <strong style={{ color: 'var(--text-primary)' }}>{activeBasin.name}</strong>
+              Tap map to drop pin • Active Region: <strong style={{ color: 'var(--text-primary)' }}>{activeBasin.name}</strong>
             </p>
           </div>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '24px' }}>
         
+        {/* Interactive Pin Drop Map Card */}
+        <div style={{ backgroundColor: 'var(--bg-panel)', border: '1px solid var(--grid-line)', borderRadius: '8px', padding: '20px' }}>
+          <div style={{ fontSize: '12px', color: 'var(--safe-cyan)', fontWeight: 'bold', letterSpacing: '0.08em', marginBottom: '8px' }}>
+            STEP 1: TAP MAP TO DROP YOUR EXACT SOS LOCATION
+          </div>
+          <div style={{ height: '300px', borderRadius: '6px', overflow: 'hidden', border: '1px solid var(--grid-line)', marginBottom: '12px' }}>
+            <MapContainer center={activeBasin.center} zoom={activeBasin.zoom} style={{ height: '100%', width: '100%' }} zoomControl={true}>
+              <TileLayer url={tileUrl} />
+              <LocationMarker position={pinPosition} setPosition={setPinPosition} />
+            </MapContainer>
+          </div>
+          <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
+            SELECTED GPS: <span style={{ color: 'var(--text-primary)' }}>{pinPosition[0].toFixed(4)}, {pinPosition[1].toFixed(4)}</span>
+          </div>
+        </div>
+
         {/* SOS Request Form Card */}
         <div style={{ 
           backgroundColor: 'var(--bg-panel)', 
-          border: '1px solid var(--alert-red)', 
+          border: '2px solid #FF4D4D', 
           borderRadius: '8px', 
           padding: '24px',
-          boxShadow: '0 4px 20px rgba(255, 77, 77, 0.15)'
+          boxShadow: '0 0 30px rgba(255, 77, 77, 0.2)'
         }}>
-          <div style={{ fontSize: '12px', color: 'var(--alert-red)', fontWeight: 'bold', letterSpacing: '0.1em', marginBottom: '8px' }}>
-            EMERGENCY BROADCAST
+          <div style={{ fontSize: '12px', color: '#FF4D4D', fontWeight: 'bold', letterSpacing: '0.1em', marginBottom: '8px' }}>
+            STEP 2: BROADCAST EMERGENCY SIGNAL
           </div>
-          <h2 style={{ margin: '0 0 16px 0', fontSize: '20px' }}>Request NDRF Air-Drop / Boat Evacuation</h2>
+          <h2 style={{ margin: '0 0 16px 0', fontSize: '20px' }}>Request NDRF Air-Drop / Evacuation</h2>
 
           {sosSent ? (
             <div style={{ 
@@ -89,10 +134,10 @@ const CivilianPublicRoute: React.FC = () => {
               borderRadius: '6px', 
               textAlign: 'center' 
             }}>
-              <div style={{ fontSize: '32px', marginBottom: '8px' }}>✅</div>
+              <div style={{ fontSize: '36px', marginBottom: '8px' }}>✅</div>
               <h3 style={{ margin: '0 0 8px 0', color: 'var(--responder-green)' }}>SOS SIGNAL TRANSMITTED</h3>
               <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-muted)' }}>
-                Your GPS telemetry & party details have been relayed to the NDRF HQ Command Map. Hold your position on high ground.
+                Your exact map pin ({pinPosition[0].toFixed(4)}, {pinPosition[1].toFixed(4)}) is now live on the NDRF HQ Map. Hold your position on high ground.
               </p>
               <button 
                 onClick={() => setSosSent(false)}
@@ -113,95 +158,83 @@ const CivilianPublicRoute: React.FC = () => {
                   max="20" 
                   value={partySize} 
                   onChange={e => setPartySize(parseInt(e.target.value) || 1)}
-                  style={{ width: '100%', padding: '10px', backgroundColor: 'var(--bg-base)', border: '1px solid var(--grid-line)', color: 'var(--text-primary)', borderRadius: '4px' }}
+                  style={{ width: '100%', padding: '12px', backgroundColor: 'var(--bg-base)', border: '1px solid var(--grid-line)', color: 'var(--text-primary)', borderRadius: '4px', fontSize: '16px' }}
                 />
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 0' }}>
                 <input 
                   type="checkbox" 
                   id="med" 
                   checked={needsMedical} 
                   onChange={e => setNeedsMedical(e.target.checked)}
-                  style={{ width: '18px', height: '18px', accentColor: 'var(--alert-red)' }}
+                  style={{ width: '20px', height: '20px', accentColor: '#FF4D4D', cursor: 'pointer' }}
                 />
-                <label htmlFor="med" style={{ fontSize: '14px', cursor: 'pointer' }}>
-                  Urgent Medical Attention / Trauma Assistance Needed
+                <label htmlFor="med" style={{ fontSize: '14px', cursor: 'pointer', fontWeight: 'bold' }}>
+                  Urgent Medical Attention Needed
                 </label>
               </div>
 
+              {/* HIGH CONTRAST SOLID RED SOS BUTTON */}
               <button 
                 type="submit" 
                 disabled={isSubmitting}
                 style={{ 
-                  backgroundColor: 'var(--alert-red)', 
-                  color: '#fff', 
+                  background: 'linear-gradient(135deg, #FF4D4D 0%, #DC2626 100%)', 
+                  color: '#FFFFFF', 
                   border: 'none', 
-                  padding: '14px', 
-                  fontWeight: 'bold', 
-                  fontSize: '15px', 
+                  padding: '18px 24px', 
+                  fontWeight: '900', 
+                  fontSize: '16px', 
                   cursor: 'pointer', 
-                  borderRadius: '4px',
-                  letterSpacing: '0.05em',
+                  borderRadius: '6px',
+                  letterSpacing: '0.08em',
+                  boxShadow: '0 0 25px rgba(255, 77, 77, 0.6)',
+                  transition: 'all 0.2s ease',
+                  textTransform: 'uppercase',
                   marginTop: '8px'
                 }}
               >
-                {isSubmitting ? 'TRANSMITTING GPS SIGNAL...' : '🔴 BROADCAST EMERGENCY SOS TO NDRF'}
+                {isSubmitting ? 'TRANSMITTING GPS SIGNAL...' : '🚨 BROADCAST EMERGENCY SOS TO NDRF'}
               </button>
             </form>
           )}
         </div>
 
-        {/* Flood Risk Status Card */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          <div style={{ 
-            backgroundColor: 'var(--bg-panel)', 
-            border: `1px solid ${isHighRisk ? 'var(--alert-amber)' : 'var(--responder-green)'}`, 
-            borderRadius: '8px', 
-            padding: '20px' 
-          }}>
-            <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>LIVE BASIN SURGE LEVEL</div>
-            <div style={{ fontSize: '32px', fontWeight: 'bold', color: isHighRisk ? 'var(--alert-amber)' : 'var(--responder-green)' }}>
-              {surgeHeight.toFixed(1)} M
-            </div>
-            <p style={{ margin: '8px 0 0 0', fontSize: '14px', color: 'var(--text-muted)' }}>
-              {isHighRisk 
-                ? '⚠️ CRITICAL SURGE ALERT: Lowland roads in this basin are severely compromised. Move to designated relief camps immediately.' 
-                : '🟢 NORMAL MONITORING: Water levels are manageable. Stay tuned to NDRF broadcast bulletins.'}
-            </p>
+      </div>
+
+      {/* Basin Status & Relief Camps */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', marginTop: '24px' }}>
+        <div style={{ 
+          backgroundColor: 'var(--bg-panel)', 
+          border: `1px solid ${isHighRisk ? 'var(--alert-amber)' : 'var(--responder-green)'}`, 
+          borderRadius: '8px', 
+          padding: '20px' 
+        }}>
+          <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>LIVE BASIN SURGE LEVEL</div>
+          <div style={{ fontSize: '32px', fontWeight: 'bold', color: isHighRisk ? 'var(--alert-amber)' : 'var(--responder-green)' }}>
+            {surgeHeight.toFixed(1)} M
           </div>
-
-          {/* NDRF Relief Camps Directory */}
-          <div style={{ backgroundColor: 'var(--bg-panel)', border: '1px solid var(--grid-line)', borderRadius: '8px', padding: '20px' }}>
-            <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '12px', letterSpacing: '0.05em' }}>
-              NEARBY NDRF RELIEF CAMPS & SHELTERS
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <div style={{ padding: '12px', border: '1px solid var(--grid-line)', borderRadius: '4px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', marginBottom: '4px' }}>
-                  <span>📍 NDRF Primary Base Camp</span>
-                  <span style={{ color: 'var(--responder-green)', fontSize: '12px' }}>OPEN</span>
-                </div>
-                <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                  Location: High Ground Ridge • Capacity: 850 / 1200 • Medical Staff: Present
-                </div>
-              </div>
-
-              <div style={{ padding: '12px', border: '1px solid var(--grid-line)', borderRadius: '4px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', marginBottom: '4px' }}>
-                  <span>📍 SDMA Sector 4 Emergency Shelter</span>
-                  <span style={{ color: 'var(--responder-green)', fontSize: '12px' }}>OPEN</span>
-                </div>
-                <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                  Location: District High School • Capacity: 410 / 600 • Ration Supply: Active
-                </div>
-              </div>
-            </div>
-          </div>
-
+          <p style={{ margin: '8px 0 0 0', fontSize: '14px', color: 'var(--text-muted)' }}>
+            {isHighRisk 
+              ? '⚠️ CRITICAL SURGE ALERT: Lowland roads in this basin are severely compromised. Move to designated relief camps immediately.' 
+              : '🟢 NORMAL MONITORING: Water levels are manageable. Stay tuned to NDRF broadcast bulletins.'}
+          </p>
         </div>
 
+        <div style={{ backgroundColor: 'var(--bg-panel)', border: '1px solid var(--grid-line)', borderRadius: '8px', padding: '20px' }}>
+          <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '12px', letterSpacing: '0.05em' }}>
+            NEARBY NDRF RELIEF CAMPS & SHELTERS
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div style={{ padding: '10px', border: '1px solid var(--grid-line)', borderRadius: '4px', fontSize: '13px' }}>
+              <strong>📍 NDRF Primary Base Camp</strong> — Capacity: 850 / 1200
+            </div>
+            <div style={{ padding: '10px', border: '1px solid var(--grid-line)', borderRadius: '4px', fontSize: '13px' }}>
+              <strong>📍 SDMA Sector 4 Emergency Shelter</strong> — Capacity: 410 / 600
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
