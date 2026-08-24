@@ -5,7 +5,7 @@ import 'leaflet/dist/leaflet.css';
 
 import { calculateImpact } from '../lib/spatialEngine';
 import { calculateEvacRoute } from '../lib/routingEngine';
-import { BasinConfig } from '../data/basinRegistry';
+import type { BasinConfig } from '../data/basinRegistry';
 import styles from './CommandMap.module.css';
 
 interface CommandMapProps {
