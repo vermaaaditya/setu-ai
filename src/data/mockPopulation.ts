@@ -1,4 +1,4 @@
-import { FeatureCollection, Point } from 'geojson';
+import type { FeatureCollection, Point } from 'geojson';
 
 export function generateMockPopulation(bounds: [number, number, number, number], count: number = 300): FeatureCollection<Point> {
   const features: any[] = [];
