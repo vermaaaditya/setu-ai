@@ -15,22 +15,25 @@ export async function generateDispatch(
   if (!import.meta.env.VITE_GROQ_API_KEY) {
     console.warn("No Groq API key found. Using fallback text.");
     return lang === 'en-US' 
-      ? `Warning. Surge level is at ${surgeHeight} meters. Estimated stranded population is ${strandedPop}. Deploy rescue teams immediately.`
-      : `चेतावनी। पानी का स्तर ${surgeHeight} मीटर है। फंसे हुए लोगों की संख्या ${strandedPop} है। बचाव दल तुरंत भेजें।`;
+      ? `Alert. Flood surge level is ${surgeHeight} meters. Estimated ${strandedPop} individuals stranded. Deploy NDRF units now.`
+      : `चेतावनी। जल स्तर ${surgeHeight} मीटर है। ${strandedPop} लोग फंसे हैं। बचाव दल तुरंत भेजें।`;
   }
 
-  const prompt = `Write a 2-sentence urgent disaster dispatch warning for a dam breach. 
-  Surge Height: ${surgeHeight} meters. 
-  Stranded Population: ${strandedPop}. 
-  Language: ${lang === 'hi-IN' ? 'Hindi' : 'English'}.
-  Keep it strictly tactical and brief. No pleasantries.`;
+  const prompt = `Write a short 2-sentence military dispatch alert for flood surge ${surgeHeight} meters with ${strandedPop} stranded people.
+  Language: ${lang === 'hi-IN' ? 'Pure Hindi' : 'English'}.
+  CRITICAL RULES:
+  1. DO NOT use markdown formatting like asterisks (**), hashtags, or quotes.
+  2. Maximum 2 short, crisp spoken sentences.
+  3. No yapping, greetings, or explanations. Plain text only.`;
 
   try {
     const response = await groq.chat.completions.create({
       messages: [{ role: 'user', content: prompt }],
-      model: 'qwen/qwen3.6-27b', // Updated to supported model from account registry
+      model: 'qwen/qwen3.6-27b',
     });
-    return response.choices[0]?.message?.content || 'Failed to generate dispatch.';
+    const raw = response.choices[0]?.message?.content || 'Dispatch generated.';
+    // Strip any markdown asterisks or special symbols so TTS does not read them out
+    return raw.replace(/[*#_~`"']/g, '').trim();
   } catch (error) {
     console.error("Groq API Error:", error);
     return 'Error generating dispatch with Groq.';
@@ -40,7 +43,8 @@ export async function generateDispatch(
 export function speakText(text: string, lang: 'en-US' | 'hi-IN') {
   if ('speechSynthesis' in window) {
     window.speechSynthesis.cancel(); // clear queue
-    const utterance = new SpeechSynthesisUtterance(text);
+    const cleanText = text.replace(/[*#_~`"']/g, '').trim();
+    const utterance = new SpeechSynthesisUtterance(cleanText);
     utterance.lang = lang;
     utterance.rate = 1.1; // Slightly faster for urgency
     window.speechSynthesis.speak(utterance);
