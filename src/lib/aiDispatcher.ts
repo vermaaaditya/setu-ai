@@ -68,7 +68,7 @@ export async function generateManifestPDF(surgeHeight: number, strandedPop: numb
   const pdfBytes = await pdfDoc.save();
   
   // Trigger download
-  const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+  const blob = new Blob([pdfBytes as any], { type: 'application/pdf' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;

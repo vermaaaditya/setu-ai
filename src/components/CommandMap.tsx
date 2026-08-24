@@ -33,7 +33,7 @@ const CommandMap: React.FC<CommandMapProps> = ({ surgeHeight, pings = [], setStr
   }, [surgeHeight]);
 
   const { floodedPolygons, deadRoadIDs, estimatedStrandedPopulation } = useMemo(() => {
-    return calculateImpact(surgeHeight, activeBasin.elevationPolygons, activeBasin.roads, activeBasin.populationData);
+    return calculateImpact(surgeHeight, activeBasin.elevationPolygons, activeBasin.roads as any, activeBasin.populationData as any);
   }, [surgeHeight, activeBasin]);
 
   // Update telemetry panel
@@ -44,7 +44,7 @@ const CommandMap: React.FC<CommandMapProps> = ({ surgeHeight, pings = [], setStr
   // Calculate Evacuation Route avoiding dead roads
   const evacRouteCoords = useMemo(() => {
     try {
-      return calculateEvacRoute(activeBasin.breachPoint, activeBasin.safeCampPoint, deadRoadIDs, activeBasin.roads);
+      return calculateEvacRoute(activeBasin.breachPoint, activeBasin.safeCampPoint, deadRoadIDs, activeBasin.roads as any);
     } catch (e) {
       return []; // No path found
     }

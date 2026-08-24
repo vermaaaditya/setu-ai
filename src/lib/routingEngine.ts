@@ -40,7 +40,7 @@ export function calculateEvacRoute(
   const endId = `${safeCampCoord[0]},${safeCampCoord[1]}`;
 
   const pathFinder = path.aStar(graph, {
-    distance(fromNode, toNode, link) {
+    distance(_fromNode, _toNode, link) {
       return link.data.weight;
     }
   });

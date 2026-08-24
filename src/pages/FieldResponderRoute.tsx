@@ -1,7 +1,7 @@
 import React from 'react';
 import { useOutletContext } from 'react-router-dom';
 import CommandMap from '../components/CommandMap';
-import { ResponderPing } from '../components/CommandLayout';
+import type { ResponderPing } from '../components/CommandLayout';
 import { basinRegistry } from '../data/basinRegistry';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase';

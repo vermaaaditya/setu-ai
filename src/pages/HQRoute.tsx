@@ -16,7 +16,7 @@ const HQRoute: React.FC = () => {
   const activeBasin = basinRegistry[selectedBasinId] || basinRegistry['brahmaputra'];
 
   const { floodedPolygons } = useMemo(() => {
-    return calculateImpact(surgeHeight, activeBasin.elevationPolygons, activeBasin.roads, activeBasin.populationData);
+    return calculateImpact(surgeHeight, activeBasin.elevationPolygons, activeBasin.roads as any, activeBasin.populationData as any);
   }, [surgeHeight, activeBasin]);
 
   return (

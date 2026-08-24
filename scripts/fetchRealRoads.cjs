@@ -3,8 +3,8 @@ const path = require('path');
 const osmtogeojson = require('osmtogeojson');
 
 const basins = [
-  { id: 'kosi', bounds: '26.00,86.50,26.20,86.70' },
-  { id: 'kerala', bounds: '10.00,76.20,10.20,76.40' }
+  { id: 'sutlej', bounds: '30.90,75.75,31.05,75.95' },
+  { id: 'ganges', bounds: '29.90,78.10,30.00,78.20' }
 ];
 
 async function fetchOSM() {

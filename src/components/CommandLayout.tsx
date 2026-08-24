@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import { doc, onSnapshot, setDoc, collection, query, orderBy, limit, Timestamp } from 'firebase/firestore';
+import { doc, onSnapshot, collection, query, orderBy, limit } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { generateDispatch, speakText, generateManifestPDF } from '../lib/aiDispatcher';
 import { basinRegistry } from '../data/basinRegistry';
@@ -15,7 +15,6 @@ export interface ResponderPing {
 }
 
 const CommandLayout: React.FC = () => {
-  const [booted, setBooted] = useState(false);
   const [surgeHeight, setSurgeHeight] = useState<number>(0);
   const [pings, setPings] = useState<ResponderPing[]>([]);
   const [strandedPop, setStrandedPop] = useState(0);
@@ -24,19 +23,12 @@ const CommandLayout: React.FC = () => {
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [selectedBasinId, setSelectedBasinId] = useState('brahmaputra');
 
-  const activeBasin = basinRegistry[selectedBasinId] || basinRegistry['brahmaputra'];
-
   const handleDispatch = async () => {
     setIsDispatching(true);
     const text = await generateDispatch(surgeHeight, strandedPop, lang);
     speakText(text, lang);
     setIsDispatching(false);
   };
-
-  useEffect(() => {
-    const timer = setTimeout(() => setBooted(true), 1000);
-    return () => clearTimeout(timer);
-  }, []);
 
   // Firebase Sync: Surge Height
   useEffect(() => {
@@ -68,13 +60,6 @@ const CommandLayout: React.FC = () => {
       console.warn("Firebase not configured yet.");
     }
   }, []);
-
-  const handleSliderChange = (val: number) => {
-    setSurgeHeight(val);
-    try {
-      setDoc(doc(db, 'commandState', 'global'), { surgeHeightInMeters: val }, { merge: true });
-    } catch (e) {}
-  };
 
   return (
     <div className={`${styles.layout} ${theme === 'light' ? 'light-theme' : ''}`}>
