@@ -22,6 +22,7 @@ const CommandLayout: React.FC = () => {
   const [isDispatching, setIsDispatching] = useState(false);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [selectedBasinId, setSelectedBasinId] = useState('brahmaputra');
+  const [showSectorModal, setShowSectorModal] = useState(true);
 
   const handleResolvePing = async (pingId: string) => {
     try {
@@ -130,7 +131,15 @@ const CommandLayout: React.FC = () => {
 
         {/* BASIN SELECTOR */}
         <div style={{ border: '1px solid var(--grid-line)', padding: '16px', borderRadius: '4px' }}>
-          <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '8px' }}>ACTIVE BASIN</div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+            <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>ACTIVE DISASTER SECTOR</div>
+            <button 
+              onClick={() => setShowSectorModal(true)}
+              style={{ padding: '2px 8px', backgroundColor: 'rgba(0, 240, 255, 0.15)', color: 'var(--safe-cyan)', border: '1px solid var(--safe-cyan)', borderRadius: '3px', cursor: 'pointer', fontSize: '10px', fontWeight: 'bold' }}
+            >
+              ⚡ SWITCH
+            </button>
+          </div>
           <select 
             value={selectedBasinId} 
             onChange={(e) => setSelectedBasinId(e.target.value)}
@@ -200,6 +209,78 @@ const CommandLayout: React.FC = () => {
           </button>
         </div>
       </aside>
+
+      {/* NATIONAL DISASTER SECTOR SELECTION MODAL */}
+      {showSectorModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999,
+          backgroundColor: 'rgba(5, 10, 20, 0.92)', backdropFilter: 'blur(10px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px'
+        }}>
+          <div style={{
+            backgroundColor: 'var(--bg-panel)', border: '2px solid var(--safe-cyan)',
+            borderRadius: '12px', padding: '32px', maxWidth: '800px', width: '100%',
+            boxShadow: '0 0 50px rgba(0, 240, 255, 0.3)', color: 'var(--text-primary)'
+          }}>
+            <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+              <div style={{ fontSize: '36px', marginBottom: '8px' }}>🇮🇳</div>
+              <h2 style={{ margin: 0, fontSize: '24px', letterSpacing: '0.08em', color: 'var(--safe-cyan)', fontWeight: '900' }}>
+                NATIONAL DISASTER COMMAND CENTER
+              </h2>
+              <p style={{ margin: '6px 0 0 0', color: 'var(--text-muted)', fontSize: '14px' }}>
+                Select an active flood crisis sector to initialize live tactical telemetry
+              </p>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+              {Object.values(basinRegistry).map(basin => (
+                <div 
+                  key={basin.id}
+                  onClick={() => {
+                    setSelectedBasinId(basin.id);
+                    setShowSectorModal(false);
+                  }}
+                  style={{
+                    backgroundColor: selectedBasinId === basin.id ? 'rgba(0, 240, 255, 0.15)' : 'var(--bg-base)',
+                    border: `2px solid ${selectedBasinId === basin.id ? 'var(--safe-cyan)' : 'var(--grid-line)'}`,
+                    borderRadius: '8px', padding: '20px', cursor: 'pointer',
+                    transition: 'all 0.2s ease', textAlign: 'left'
+                  }}
+                >
+                  <div style={{ fontSize: '11px', color: 'var(--safe-cyan)', fontWeight: 'bold', letterSpacing: '0.08em', marginBottom: '4px' }}>
+                    CRISIS SECTOR
+                  </div>
+                  <div style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '8px' }}>
+                    {basin.name}
+                  </div>
+                  <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '12px' }}>
+                    GPS: {basin.center[0].toFixed(2)}, {basin.center[1].toFixed(2)}
+                  </div>
+                  <button 
+                    style={{
+                      width: '100%', padding: '10px',
+                      backgroundColor: 'var(--safe-cyan)', color: '#000', border: 'none',
+                      borderRadius: '4px', fontWeight: '900', fontSize: '12px', cursor: 'pointer',
+                      letterSpacing: '0.05em'
+                    }}
+                  >
+                    INITIALIZE COMMAND →
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ textAlign: 'center' }}>
+              <button 
+                onClick={() => setShowSectorModal(false)}
+                style={{ padding: '8px 20px', backgroundColor: 'transparent', border: '1px solid var(--grid-line)', color: 'var(--text-muted)', cursor: 'pointer', borderRadius: '4px', fontSize: '12px' }}
+              >
+                Skip / Continue with Current Sector ({basinRegistry[selectedBasinId]?.name.split(':')[0]})
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
