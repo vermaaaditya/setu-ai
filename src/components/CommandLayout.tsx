@@ -72,6 +72,14 @@ const CommandLayout: React.FC = () => {
           <div className={styles.navIcon}>FR</div>
           <span className={styles.navLabel}>Field Responder</span>
         </NavLink>
+        <NavLink to="/civilian" className={({ isActive }) => `${styles.navItem} ${isActive ? styles.active : ''}`}>
+          <div className={styles.navIcon}>SOS</div>
+          <span className={styles.navLabel}>Citizen SOS</span>
+        </NavLink>
+        <NavLink to="/analytics" className={({ isActive }) => `${styles.navItem} ${isActive ? styles.active : ''}`}>
+          <div className={styles.navIcon}>LOG</div>
+          <span className={styles.navLabel}>Analytics & Logs</span>
+        </NavLink>
         <div style={{ marginTop: 'auto', marginBottom: '20px', display: 'flex', justifyContent: 'center' }}>
           <button 
             onClick={() => setTheme(prev => prev === 'dark' ? 'light' : 'dark')}
