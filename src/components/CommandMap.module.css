@@ -1,0 +1,99 @@
+.mapWrapper {
+  width: 100%;
+  height: 100%;
+  background-color: var(--bg-base);
+  z-index: 1;
+}
+
+/* Radar Pulse Animation */
+.radarPulseMarker {
+  background: transparent;
+  border: none;
+}
+.radarPulse {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.radarPulse::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background-color: var(--threat-amber);
+  border-radius: 50%;
+  z-index: 2;
+}
+.radarPulse::before {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--threat-amber);
+  animation: sweep 1s ease-out forwards;
+  z-index: 1;
+}
+
+/* Evac Route Animation */
+.evacRoute {
+  stroke-dasharray: 2000;
+  stroke-dashoffset: 2000;
+  animation: drawRoute 3s ease-out forwards;
+}
+
+/* Arrival Pin Pulse */
+.arrivalPin {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.arrivalPin::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+}
+.arrivalPin.safe::after { background-color: var(--responder-green); }
+.arrivalPin.stranded::after { background-color: var(--responder-red); }
+
+.arrivalPin::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  animation: pingPulse 1s ease-out;
+}
+.arrivalPin.safe::before { border: 2px solid var(--responder-green); }
+.arrivalPin.stranded::before { border: 2px solid var(--responder-red); }
+
+@keyframes sweep {
+  0% { transform: scale(1); opacity: 1; border-width: 4px; }
+  100% { transform: scale(20); opacity: 0; border-width: 1px; }
+}
+
+@keyframes drawRoute {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes pingPulse {
+  0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(5); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .radarPulse::before, .evacRoute, .arrivalPin::before {
+    animation: none !important;
+  }
+}

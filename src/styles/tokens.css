@@ -1,0 +1,23 @@
+:root {
+  --bg-base: #0D1117;
+  --bg-panel: #131A22;
+  --grid-line: #1E2833;
+  --threat-amber: #FFB020;
+  --safe-cyan: #22D3EE;
+  --responder-green: #34D399;
+  --responder-red: #F43F5E;
+  --text-primary: #E6EDF3;
+  --text-muted: #7D8994;
+
+  --font-heading: 'Space Grotesk', sans-serif;
+  --font-data: 'JetBrains Mono', monospace;
+}
+
+/* Light Mode Overrides */
+.light-theme {
+  --bg-base: #F8FAFC;
+  --bg-panel: #FFFFFF;
+  --grid-line: #E2E8F0;
+  --text-primary: #0F172A;
+  --text-muted: #64748B;
+}

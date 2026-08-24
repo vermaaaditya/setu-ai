@@ -1,0 +1,39 @@
+{
+  "name": "setu-ui",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "oxlint",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@turf/turf": "^7.4.0",
+    "firebase": "^12.18.0",
+    "groq-sdk": "^1.5.0",
+    "leaflet": "^1.9.4",
+    "leaflet-draw": "^1.0.4",
+    "ngraph.graph": "^20.1.2",
+    "ngraph.path": "^1.6.1",
+    "pdf-lib": "^1.17.1",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-leaflet": "^5.0.0",
+    "react-router-dom": "^7.18.2",
+    "tokml": "^0.4.0"
+  },
+  "devDependencies": {
+    "@types/leaflet": "^1.9.22",
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.4",
+    "axios": "^1.19.0",
+    "osmtogeojson": "^3.0.0-beta.5",
+    "oxlint": "^1.75.0",
+    "typescript": "~6.0.2",
+    "vite": "^8.2.0"
+  }
+}

@@ -1,0 +1,145 @@
+.layout {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  background-color: var(--bg-base);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Boot Sequence Grid Animation */
+.layout::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+  background-size: 50px 50px;
+  opacity: 0;
+  pointer-events: none;
+  animation: bootGrid 0.6s ease-out forwards;
+}
+
+/* Corner brackets drawing animation */
+.layout::after {
+  content: '';
+  position: absolute;
+  inset: 20px;
+  border: 2px solid transparent;
+  pointer-events: none;
+  /* Simulating brackets via multiple backgrounds/borders could be complex,
+     we will do a simpler inset border that fades in as the brackets */
+  background: 
+    linear-gradient(var(--safe-cyan), var(--safe-cyan)) top left/20px 2px no-repeat,
+    linear-gradient(var(--safe-cyan), var(--safe-cyan)) top left/2px 20px no-repeat,
+    linear-gradient(var(--safe-cyan), var(--safe-cyan)) top right/20px 2px no-repeat,
+    linear-gradient(var(--safe-cyan), var(--safe-cyan)) top right/2px 20px no-repeat,
+    linear-gradient(var(--safe-cyan), var(--safe-cyan)) bottom left/20px 2px no-repeat,
+    linear-gradient(var(--safe-cyan), var(--safe-cyan)) bottom left/2px 20px no-repeat,
+    linear-gradient(var(--safe-cyan), var(--safe-cyan)) bottom right/20px 2px no-repeat,
+    linear-gradient(var(--safe-cyan), var(--safe-cyan)) bottom right/2px 20px no-repeat;
+  opacity: 0;
+  animation: bootBrackets 0.6s 0.2s ease-out forwards;
+}
+
+@keyframes bootGrid {
+  0% { opacity: 0; transform: scale(1.05); }
+  100% { opacity: 0.15; transform: scale(1); }
+}
+
+@keyframes bootBrackets {
+  0% { opacity: 0; inset: 40px; }
+  100% { opacity: 0.8; inset: 20px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .layout::before,
+  .layout::after {
+    animation: none;
+    opacity: 0.15;
+  }
+  .layout::after {
+    opacity: 0.8;
+  }
+}
+
+/* Dynamic Left Rail */
+.leftRail {
+  width: 64px;
+  background-color: var(--bg-panel);
+  border-right: 1px solid var(--grid-line);
+  display: flex;
+  flex-direction: column;
+  padding: 20px 0;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 10;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.leftRail:hover {
+  width: 240px;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.2s, background-color 0.2s;
+}
+
+.navItem:hover, .navItem.active {
+  color: var(--safe-cyan);
+  background-color: rgba(34, 211, 238, 0.1);
+}
+
+.navIcon {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.navLabel {
+  margin-left: 16px;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.leftRail:hover .navLabel {
+  opacity: 1;
+  transition-delay: 0.1s;
+}
+
+/* Central Map */
+.mapCanvas {
+  flex: 1;
+  position: relative;
+  background-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+/* Right Telemetry Panel */
+.telemetryPanel {
+  width: 380px; /* ~30% of standard desktop */
+  background-color: var(--bg-panel);
+  border-left: 1px solid var(--grid-line);
+  padding: 24px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
