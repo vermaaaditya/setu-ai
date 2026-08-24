@@ -1,28 +1,18 @@
-import type { FeatureCollection, Point } from 'geojson';
+import { FeatureCollection, Point } from 'geojson';
 
-// Brahmaputra population clusters
-export const populationGeoJSONData: FeatureCollection<Point> = {
-  type: 'FeatureCollection',
-  features: [
-    {
+export function generateMockPopulation(bounds: [number, number, number, number], count: number = 300): FeatureCollection<Point> {
+  const features: any[] = [];
+  const [minLat, minLng, maxLat, maxLng] = bounds;
+  for (let i = 0; i < count; i++) {
+    const lat = minLat + Math.random() * (maxLat - minLat);
+    const lng = minLng + Math.random() * (maxLng - minLng);
+    features.push({
       type: 'Feature',
-      properties: { id: 'pop-1', population: 3500 }, // Lowland cluster
-      geometry: { type: 'Point', coordinates: [94.10, 26.90] }
-    },
-    {
-      type: 'Feature',
-      properties: { id: 'pop-2', population: 4200 }, // Lowland cluster
-      geometry: { type: 'Point', coordinates: [94.12, 26.88] }
-    },
-    {
-      type: 'Feature',
-      properties: { id: 'pop-3', population: 6100 }, // Mid ground cluster
-      geometry: { type: 'Point', coordinates: [94.20, 26.92] }
-    },
-    {
-      type: 'Feature',
-      properties: { id: 'pop-4', population: 8500 }, // High ground cluster
-      geometry: { type: 'Point', coordinates: [94.18, 26.80] }
-    }
-  ]
-};
+      properties: { population: Math.floor(Math.random() * 50) + 10 },
+      geometry: { type: 'Point', coordinates: [lng, lat] }
+    });
+  }
+  return { type: 'FeatureCollection', features };
+}
+
+export const populationGeoJSONData = generateMockPopulation([26.75, 94.00, 26.95, 94.25]);

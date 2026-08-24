@@ -3,6 +3,7 @@ import { NavLink, Outlet } from 'react-router-dom';
 import { doc, onSnapshot, setDoc, collection, query, orderBy, limit, Timestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { generateDispatch, speakText, generateManifestPDF } from '../lib/aiDispatcher';
+import { basinRegistry } from '../data/basinRegistry';
 import styles from './CommandLayout.module.css';
 
 export interface ResponderPing {
@@ -21,6 +22,9 @@ const CommandLayout: React.FC = () => {
   const [lang, setLang] = useState<'en-US' | 'hi-IN'>('en-US');
   const [isDispatching, setIsDispatching] = useState(false);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const [selectedBasinId, setSelectedBasinId] = useState('brahmaputra');
+
+  const activeBasin = basinRegistry[selectedBasinId] || basinRegistry['brahmaputra'];
 
   const handleDispatch = async () => {
     setIsDispatching(true);
@@ -96,7 +100,7 @@ const CommandLayout: React.FC = () => {
 
       <main className={styles.mapCanvas}>
         {/* Pass down everything needed by the map */}
-        <Outlet context={{ surgeHeight, pings, setStrandedPop, theme }} />
+        <Outlet context={{ surgeHeight, pings, setStrandedPop, theme, selectedBasinId }} />
       </main>
 
       <aside className={styles.telemetryPanel}>
@@ -104,18 +108,32 @@ const CommandLayout: React.FC = () => {
           Live Telemetry
         </h2>
         
-        <div style={{ backgroundColor: 'rgba(255, 176, 32, 0.1)', border: '1px solid var(--threat-amber)', padding: '16px', borderRadius: '4px' }}>
-          <div style={{ fontSize: '12px', color: 'var(--threat-amber)', marginBottom: '8px' }}>SURGE SIMULATION</div>
-          <div className="data-value" style={{ fontSize: '24px', color: 'var(--text-primary)', marginBottom: '12px' }}>
-            {surgeHeight.toFixed(1)} m
+        <div style={{ border: '1px solid var(--grid-line)', padding: '16px', borderRadius: '4px' }}>
+          <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '8px', display: 'flex', justifyContent: 'space-between' }}>
+            <span>SURGE SIMULATOR</span>
+            <span style={{ color: 'var(--alert-amber)' }}>{surgeHeight}M</span>
           </div>
           <input 
             type="range" 
-            min="0" max="10" step="0.5" 
+            min="0" max="15" step="1" 
             value={surgeHeight} 
-            onChange={(e) => handleSliderChange(parseFloat(e.target.value))}
-            style={{ width: '100%', accentColor: 'var(--threat-amber)' }}
+            onChange={e => setSurgeHeight(parseInt(e.target.value))}
+            style={{ width: '100%' }}
           />
+        </div>
+
+        {/* BASIN SELECTOR */}
+        <div style={{ border: '1px solid var(--grid-line)', padding: '16px', borderRadius: '4px' }}>
+          <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '8px' }}>ACTIVE BASIN</div>
+          <select 
+            value={selectedBasinId} 
+            onChange={(e) => setSelectedBasinId(e.target.value)}
+            style={{ width: '100%', padding: '8px', backgroundColor: 'var(--bg-base)', color: 'var(--text-primary)', border: '1px solid var(--grid-line)' }}
+          >
+            {Object.values(basinRegistry).map(b => (
+              <option key={b.id} value={b.id}>{b.name}</option>
+            ))}
+          </select>
         </div>
         
         <div style={{ border: '1px solid var(--grid-line)', padding: '16px', borderRadius: '4px' }}>

@@ -28,7 +28,7 @@ export async function generateDispatch(
   try {
     const response = await groq.chat.completions.create({
       messages: [{ role: 'user', content: prompt }],
-      model: 'llama-3.1-8b-instant', // Updated from decommissioned llama3-8b-8192
+      model: 'qwen/qwen3.6-27b', // Updated to supported model from account registry
     });
     return response.choices[0]?.message?.content || 'Failed to generate dispatch.';
   } catch (error) {

@@ -1,13 +1,11 @@
 import React, { useMemo, useEffect, useState } from 'react';
-import { MapContainer, TileLayer, GeoJSON, Marker, Polyline } from 'react-leaflet';
+import { MapContainer, TileLayer, GeoJSON, Marker, Polyline, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-import { elevationGeoJSONData } from '../data/mockBasin';
-import realRoadsData from '../data/realRoads.json';
-import { populationGeoJSONData } from '../data/mockPopulation';
 import { calculateImpact } from '../lib/spatialEngine';
 import { calculateEvacRoute } from '../lib/routingEngine';
+import { BasinConfig } from '../data/basinRegistry';
 import styles from './CommandMap.module.css';
 
 interface CommandMapProps {
@@ -15,12 +13,19 @@ interface CommandMapProps {
   pings?: any[];
   setStrandedPop?: (val: number) => void;
   theme?: 'dark' | 'light';
+  activeBasin: BasinConfig;
 }
 
-const breachPoint: [number, number] = [26.90, 94.08]; // Riverbank breach
-const safeCampPoint: [number, number] = [26.80, 94.20]; // High ground camp
+// Component to dynamically fly the map when basin changes
+function MapRecenter({ center, zoom }: { center: [number, number], zoom: number }) {
+  const map = useMap();
+  useEffect(() => {
+    map.flyTo(center, zoom, { animate: true, duration: 1.5 });
+  }, [center, zoom, map]);
+  return null;
+}
 
-const CommandMap: React.FC<CommandMapProps> = ({ surgeHeight, pings = [], setStrandedPop, theme = 'dark' }) => {
+const CommandMap: React.FC<CommandMapProps> = ({ surgeHeight, pings = [], setStrandedPop, theme = 'dark', activeBasin }) => {
   const [animKey, setAnimKey] = useState(0);
 
   useEffect(() => {
@@ -28,8 +33,8 @@ const CommandMap: React.FC<CommandMapProps> = ({ surgeHeight, pings = [], setStr
   }, [surgeHeight]);
 
   const { floodedPolygons, deadRoadIDs, estimatedStrandedPopulation } = useMemo(() => {
-    return calculateImpact(surgeHeight, elevationGeoJSONData, realRoadsData as any, populationGeoJSONData);
-  }, [surgeHeight]);
+    return calculateImpact(surgeHeight, activeBasin.elevationPolygons, activeBasin.roads, activeBasin.populationData);
+  }, [surgeHeight, activeBasin]);
 
   // Update telemetry panel
   useEffect(() => {
@@ -38,14 +43,12 @@ const CommandMap: React.FC<CommandMapProps> = ({ surgeHeight, pings = [], setStr
 
   // Calculate Evacuation Route avoiding dead roads
   const evacRouteCoords = useMemo(() => {
-    // A mock road network node starting point (e.g. from a stranded population cluster)
-    // We try to find a path from [26.90, 94.08] to Safe Camp [26.80, 94.20]
     try {
-      return calculateEvacRoute([26.90, 94.08], safeCampPoint, deadRoadIDs, realRoadsData as any);
+      return calculateEvacRoute(activeBasin.breachPoint, activeBasin.safeCampPoint, deadRoadIDs, activeBasin.roads);
     } catch (e) {
       return []; // No path found
     }
-  }, [deadRoadIDs]);
+  }, [deadRoadIDs, activeBasin]);
 
   const roadStyle = (feature: any) => {
     const isDead = deadRoadIDs.includes(feature.properties.id);
@@ -61,6 +64,8 @@ const CommandMap: React.FC<CommandMapProps> = ({ surgeHeight, pings = [], setStr
     iconAnchor: [20, 20]
   });
 
+  const campIcon = new L.Icon.Default();
+
   const getPingIcon = (status: string) => new L.DivIcon({
     className: '',
     html: `<div class="${styles.arrivalPin} ${status === 'SAFE' ? styles.safe : styles.stranded}"></div>`,
@@ -74,13 +79,14 @@ const CommandMap: React.FC<CommandMapProps> = ({ surgeHeight, pings = [], setStr
 
   return (
     <div className={styles.mapWrapper}>
-      <MapContainer center={[26.85, 94.15]} zoom={11} style={{ height: '100%', width: '100%', backgroundColor: 'var(--bg-base)' }} zoomControl={false}>
+      <MapContainer center={activeBasin.center} zoom={activeBasin.zoom} style={{ height: '100%', width: '100%', backgroundColor: 'var(--bg-base)' }} zoomControl={false}>
+        <MapRecenter center={activeBasin.center} zoom={activeBasin.zoom} />
         <TileLayer url={tileUrl} />
 
-        <GeoJSON key="roads" data={realRoadsData as any} style={roadStyle} />
+        <GeoJSON key={`roads-${activeBasin.id}`} data={activeBasin.roads} style={roadStyle} />
 
         {floodedPolygons.features.length > 0 && (
-          <GeoJSON key={`flood-${surgeHeight}`} data={floodedPolygons as any} style={floodStyle} />
+          <GeoJSON key={`flood-${activeBasin.id}-${surgeHeight}`} data={floodedPolygons as any} style={floodStyle} />
         )}
 
         {/* Evacuation Route */}
@@ -97,9 +103,17 @@ const CommandMap: React.FC<CommandMapProps> = ({ surgeHeight, pings = [], setStr
           <Marker key={ping.id} position={[ping.lat, ping.lng]} icon={getPingIcon(ping.status)} />
         ))}
 
+        <Marker position={activeBasin.safeCampPoint} icon={campIcon}>
+          <Popup>Safe Evacuation Camp</Popup>
+        </Marker>
+
+        <Marker position={activeBasin.breachPoint} icon={campIcon}>
+          <Popup>Breach / Stranded Origin</Popup>
+        </Marker>
+
         {/* Radar Pulse Marker at Dam Breach */}
         {surgeHeight > 0 && (
-          <Marker key={`pulse-${animKey}`} position={breachPoint} icon={pulseIcon} />
+          <Marker key={`pulse-${animKey}`} position={activeBasin.breachPoint} icon={pulseIcon} />
         )}
       </MapContainer>
     </div>

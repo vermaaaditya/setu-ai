@@ -3,25 +3,25 @@ import { useOutletContext } from 'react-router-dom';
 import CommandMap from '../components/CommandMap';
 import { exportFloodZonesToKML } from '../lib/exportUtils';
 import { calculateImpact } from '../lib/spatialEngine';
-import { elevationGeoJSONData } from '../data/mockBasin';
-import realRoadsData from '../data/realRoads.json';
-import { populationGeoJSONData } from '../data/mockPopulation';
+import { basinRegistry } from '../data/basinRegistry';
 
 interface ContextType {
   surgeHeight: number;
   theme: 'dark' | 'light';
+  selectedBasinId: string;
 }
 
 const HQRoute: React.FC = () => {
-  const { surgeHeight, theme } = useOutletContext<ContextType>();
+  const { surgeHeight, theme, selectedBasinId } = useOutletContext<ContextType>();
+  const activeBasin = basinRegistry[selectedBasinId] || basinRegistry['brahmaputra'];
 
   const { floodedPolygons } = useMemo(() => {
-    return calculateImpact(surgeHeight, elevationGeoJSONData, realRoadsData as any, populationGeoJSONData);
-  }, [surgeHeight]);
+    return calculateImpact(surgeHeight, activeBasin.elevationPolygons, activeBasin.roads, activeBasin.populationData);
+  }, [surgeHeight, activeBasin]);
 
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative' }}>
-      <CommandMap surgeHeight={surgeHeight} theme={theme} />
+      <CommandMap surgeHeight={surgeHeight} theme={theme} activeBasin={activeBasin} />
       
       {/* Absolute positioned HQ label over map */}
       <div style={{ 
@@ -30,8 +30,8 @@ const HQRoute: React.FC = () => {
         border: '1px solid var(--grid-line)', borderRadius: '4px',
         display: 'flex', flexDirection: 'column', gap: '8px'
       }}>
-        <div style={{ color: 'var(--text-primary)', fontWeight: 'bold', letterSpacing: '0.05em' }}>
-          HQ COMMAND AREA: ASSAM 2020 BRAHMAPUTRA BREACH
+        <div style={{ color: 'var(--text-primary)', fontWeight: 'bold', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+          HQ COMMAND AREA: {activeBasin.name}
         </div>
         <button 
           onClick={() => exportFloodZonesToKML(floodedPolygons, surgeHeight)}

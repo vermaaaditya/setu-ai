@@ -1,18 +1,22 @@
 import React from 'react';
 import { useOutletContext } from 'react-router-dom';
 import CommandMap from '../components/CommandMap';
+import { ResponderPing } from '../components/CommandLayout';
+import { basinRegistry } from '../data/basinRegistry';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
 interface ContextType {
   surgeHeight: number;
-  pings: any[];
+  pings: ResponderPing[];
   setStrandedPop: (val: number) => void;
   theme: 'dark' | 'light';
+  selectedBasinId: string;
 }
 
 const FieldResponderRoute: React.FC = () => {
-  const { surgeHeight, pings, setStrandedPop, theme } = useOutletContext<ContextType>();
+  const { surgeHeight, pings, setStrandedPop, theme, selectedBasinId } = useOutletContext<ContextType>();
+  const activeBasin = basinRegistry[selectedBasinId] || basinRegistry['brahmaputra'];
 
   const sendPing = async (status: 'SAFE' | 'STRANDED') => {
     try {
@@ -30,7 +34,7 @@ const FieldResponderRoute: React.FC = () => {
 
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative' }}>
-      <CommandMap surgeHeight={surgeHeight} pings={pings} setStrandedPop={setStrandedPop} theme={theme} />
+      <CommandMap surgeHeight={surgeHeight} pings={pings} setStrandedPop={setStrandedPop} theme={theme} activeBasin={activeBasin} />
       
       {/* Top Left Label */}
       <div style={{ 
