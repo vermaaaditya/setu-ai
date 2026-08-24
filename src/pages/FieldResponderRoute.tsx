@@ -23,8 +23,8 @@ const FieldResponderRoute: React.FC = () => {
       await addDoc(collection(db, 'responderStatus'), {
         id: `Unit-${Math.floor(Math.random() * 900) + 100}`,
         status,
-        lat: 26.75 + Math.random() * 0.2, // Brahmaputra region
-        lng: 94.05 + Math.random() * 0.2,
+        lat: activeBasin.center[0] + (Math.random() - 0.5) * 0.04,
+        lng: activeBasin.center[1] + (Math.random() - 0.5) * 0.04,
         timestamp: serverTimestamp()
       });
     } catch (e) {
