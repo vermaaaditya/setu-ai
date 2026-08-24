@@ -223,7 +223,6 @@ const CommandLayout: React.FC = () => {
             boxShadow: '0 0 50px rgba(0, 240, 255, 0.3)', color: 'var(--text-primary)'
           }}>
             <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-              <div style={{ fontSize: '36px', marginBottom: '8px' }}>🇮🇳</div>
               <h2 style={{ margin: 0, fontSize: '24px', letterSpacing: '0.08em', color: 'var(--safe-cyan)', fontWeight: '900' }}>
                 NATIONAL DISASTER COMMAND CENTER
               </h2>

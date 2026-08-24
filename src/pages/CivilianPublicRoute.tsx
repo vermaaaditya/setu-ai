@@ -122,14 +122,11 @@ const CivilianPublicRoute: React.FC = () => {
 
       {/* Header */}
       <div style={{ marginBottom: '24px', borderBottom: '1px solid var(--grid-line)', paddingBottom: '16px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <span style={{ fontSize: '28px' }}>🇮🇳</span>
-          <div>
-            <h1 style={{ margin: 0, fontSize: '24px', letterSpacing: '0.05em' }}>NDRF CITIZEN EMERGENCY SOS PORTAL</h1>
-            <p style={{ margin: '4px 0 0 0', color: 'var(--text-muted)', fontSize: '14px' }}>
-              Tap map to drop pin • Active Region: <strong style={{ color: 'var(--text-primary)' }}>{activeBasin.name}</strong>
-            </p>
-          </div>
+        <div>
+          <h1 style={{ margin: 0, fontSize: '24px', letterSpacing: '0.05em' }}>NDRF CITIZEN EMERGENCY SOS PORTAL</h1>
+          <p style={{ margin: '4px 0 0 0', color: 'var(--text-muted)', fontSize: '14px' }}>
+            Tap map to drop pin • Active Region: <strong style={{ color: 'var(--text-primary)' }}>{activeBasin.name}</strong>
+          </p>
         </div>
       </div>
 
