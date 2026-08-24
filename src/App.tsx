@@ -4,6 +4,7 @@ import HQRoute from './pages/HQRoute';
 import FieldResponderRoute from './pages/FieldResponderRoute';
 import CivilianPublicRoute from './pages/CivilianPublicRoute';
 import AnalyticsRoute from './pages/AnalyticsRoute';
+import NavigationRoute from './pages/NavigationRoute';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
           <Route path="responder" element={<FieldResponderRoute />} />
           <Route path="civilian" element={<CivilianPublicRoute />} />
           <Route path="analytics" element={<AnalyticsRoute />} />
+          <Route path="navigation" element={<NavigationRoute />} />
         </Route>
       </Routes>
     </BrowserRouter>

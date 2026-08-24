@@ -85,6 +85,10 @@ const CommandLayout: React.FC = () => {
           <div className={styles.navIcon}>SOS</div>
           <span className={styles.navLabel}>Citizen SOS</span>
         </NavLink>
+        <NavLink to="/navigation" className={({ isActive }) => `${styles.navItem} ${isActive ? styles.active : ''}`}>
+          <div className={styles.navIcon}>NAV</div>
+          <span className={styles.navLabel}>Evac Nav</span>
+        </NavLink>
         <NavLink to="/analytics" className={({ isActive }) => `${styles.navItem} ${isActive ? styles.active : ''}`}>
           <div className={styles.navIcon}>LOG</div>
           <span className={styles.navLabel}>Analytics & Logs</span>
