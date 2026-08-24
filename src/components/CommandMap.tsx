@@ -67,7 +67,12 @@ const CommandMap: React.FC<CommandMapProps> = ({ surgeHeight, pings = [], setStr
     iconAnchor: [20, 20]
   });
 
-  const campIcon = new L.Icon.Default();
+  const campIcon = new L.DivIcon({
+    className: '',
+    html: `<div style="background-color: #00F0FF; width: 28px; height: 28px; border-radius: 6px; border: 3px solid #FFF; box-shadow: 0 0 15px #00F0FF; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #000; font-weight: bold;">⛺</div>`,
+    iconSize: [28, 28],
+    iconAnchor: [14, 14]
+  });
 
   const getPingIcon = (status: string) => new L.DivIcon({
     className: '',
@@ -106,18 +111,13 @@ const CommandMap: React.FC<CommandMapProps> = ({ surgeHeight, pings = [], setStr
           <Marker key={ping.id} position={[ping.lat, ping.lng]} icon={getPingIcon(ping.status)} />
         ))}
 
+        {/* Safe Evacuation Camp Pin */}
         <Marker position={activeBasin.safeCampPoint} icon={campIcon}>
-          <Popup>Safe Evacuation Camp</Popup>
-        </Marker>
-
-        <Marker position={activeBasin.breachPoint} icon={campIcon}>
-          <Popup>Breach / Stranded Origin</Popup>
+          <Popup>⛺ Safe Evacuation Camp</Popup>
         </Marker>
 
         {/* Radar Pulse Marker at Dam Breach */}
-        {surgeHeight > 0 && (
-          <Marker key={`pulse-${animKey}`} position={activeBasin.breachPoint} icon={pulseIcon} />
-        )}
+        <Marker key={`pulse-${animKey}`} position={activeBasin.breachPoint} icon={pulseIcon} />
       </MapContainer>
     </div>
   );
