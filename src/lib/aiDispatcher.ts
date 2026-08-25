@@ -3,7 +3,7 @@ import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 
 // Initialize Groq. We allow browser since this is a client-side prototype.
 const groq = new Groq({ 
-  apiKey: import.meta.env.VITE_GROQ_API_KEY || 'dummy_key',
+  apiKey: (import.meta.env.VITE_GROQ_API_KEY || 'dummy_key').trim(),
   dangerouslyAllowBrowser: true 
 });
 
@@ -87,7 +87,7 @@ Live Context:
         { role: 'system', content: systemPrompt },
         ...messages
       ],
-      model: 'llama-3.1-8b-instant', // Fast conversational model
+      model: 'llama3-8b-8192', // Extremely stable, universally available free-tier model
       max_tokens: 150,
       temperature: 0.5
     });
