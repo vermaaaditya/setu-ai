@@ -87,7 +87,7 @@ Live Context:
         { role: 'system', content: systemPrompt },
         ...messages
       ],
-      model: 'llama3-8b-8192', // Extremely stable, universally available free-tier model
+      model: 'qwen/qwen3.6-27b', // Valid model available on this API key
       max_tokens: 150,
       temperature: 0.5
     });
