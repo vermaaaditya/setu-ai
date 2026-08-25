@@ -81,13 +81,24 @@ const CivilianPublicRoute: React.FC = () => {
 
   return (
     <div style={{ 
-      padding: '32px', 
+      padding: 'var(--content-padding, 32px)', 
       maxWidth: '1400px', 
       margin: '0 auto', 
       color: 'var(--text-primary)',
       height: '100%',
-      overflowY: 'auto'
+      overflowY: 'auto',
+      boxSizing: 'border-box'
     }}>
+      
+      <style>
+        {`
+          @media (max-width: 768px) {
+            :root {
+              --content-padding: 16px;
+            }
+          }
+        `}
+      </style>
       
       {/* AUTOMATIC GOVERNMENT EMERGENCY CELL BROADCAST BANNER (No phone number input required!) */}
       {isHighRisk && !dismissedCellBroadcast && (
@@ -130,14 +141,14 @@ const CivilianPublicRoute: React.FC = () => {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 340px), 1fr))', gap: '24px' }}>
         
         {/* Interactive Pin Drop Map Card */}
         <div style={{ backgroundColor: 'var(--bg-panel)', border: '1px solid var(--grid-line)', borderRadius: '8px', padding: '20px', display: 'flex', flexDirection: 'column' }}>
           <div style={{ fontSize: '12px', color: 'var(--safe-cyan)', fontWeight: 'bold', letterSpacing: '0.08em', marginBottom: '8px' }}>
             STEP 1: TAP MAP TO DROP YOUR EXACT SOS LOCATION
           </div>
-          <div style={{ height: '480px', borderRadius: '6px', overflow: 'hidden', border: '1px solid var(--grid-line)', marginBottom: '12px', flex: 1 }}>
+          <div style={{ minHeight: '480px', height: '480px', borderRadius: '6px', overflow: 'hidden', border: '1px solid var(--grid-line)', marginBottom: '12px' }}>
             <MapContainer center={activeBasin.center} zoom={activeBasin.zoom} style={{ height: '100%', width: '100%' }} zoomControl={true}>
               <TileLayer url={tileUrl} />
               <LocationMarker position={pinPosition} setPosition={setPinPosition} />

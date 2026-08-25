@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import CommandLayout from './components/CommandLayout';
 import HQRoute from './pages/HQRoute';
 import FieldResponderRoute from './pages/FieldResponderRoute';
@@ -8,7 +8,7 @@ import NavigationRoute from './pages/NavigationRoute';
 
 function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
         <Route path="/" element={<CommandLayout />}>
           <Route index element={<Navigate to="/hq" replace />} />
@@ -19,7 +19,7 @@ function App() {
           <Route path="navigation" element={<NavigationRoute />} />
         </Route>
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 
