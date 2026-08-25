@@ -127,8 +127,9 @@
   position: relative;
   background-color: transparent;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
   z-index: 1;
 }
 

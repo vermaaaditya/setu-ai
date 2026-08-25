@@ -14,6 +14,8 @@ interface CommandMapProps {
   setStrandedPop?: (val: number) => void;
   theme?: 'dark' | 'light';
   activeBasin: BasinConfig;
+  onMapClick?: (lat: number, lng: number) => void;
+  frLocation?: [number, number] | null;
 }
 
 // Component to dynamically fly the map when basin changes
@@ -25,7 +27,17 @@ function MapRecenter({ center, zoom }: { center: [number, number], zoom: number 
   return null;
 }
 
-const CommandMap: React.FC<CommandMapProps> = ({ surgeHeight, pings = [], setStrandedPop, theme = 'dark', activeBasin }) => {
+// Map Click Handler for Field Responder
+function MapClickHandler({ onMapClick }: { onMapClick?: (lat: number, lng: number) => void }) {
+  useMapEvents({
+    click(e) {
+      if (onMapClick) onMapClick(e.latlng.lat, e.latlng.lng);
+    }
+  });
+  return null;
+}
+
+const CommandMap: React.FC<CommandMapProps> = ({ surgeHeight, pings = [], setStrandedPop, theme = 'dark', activeBasin, onMapClick, frLocation }) => {
   const [animKey, setAnimKey] = useState(0);
   
   // React 18 Concurrent Rendering: Defer heavy 20,000-road GeoJSON spatial math to background frames
@@ -81,6 +93,13 @@ const CommandMap: React.FC<CommandMapProps> = ({ surgeHeight, pings = [], setStr
     iconAnchor: [12, 12]
   });
 
+  const frSelfIcon = new L.DivIcon({
+    className: '',
+    html: `<div style="background-color: #3B82F6; width: 24px; height: 24px; border-radius: 50%; border: 3px solid #FFF; box-shadow: 0 0 15px #3B82F6; animation: pulse 1.5s infinite;"></div>`,
+    iconSize: [24, 24],
+    iconAnchor: [12, 12]
+  });
+
   const tileUrl = theme === 'light' 
     ? "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
     : "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
@@ -89,6 +108,7 @@ const CommandMap: React.FC<CommandMapProps> = ({ surgeHeight, pings = [], setStr
     <div className={styles.mapWrapper}>
       <MapContainer center={activeBasin.center} zoom={activeBasin.zoom} style={{ height: '100%', width: '100%', backgroundColor: 'var(--bg-base)' }} zoomControl={false}>
         <MapRecenter center={activeBasin.center} zoom={activeBasin.zoom} />
+        <MapClickHandler onMapClick={onMapClick} />
         <TileLayer url={tileUrl} />
 
         <GeoJSON key={`roads-${activeBasin.id}`} data={activeBasin.roads} style={roadStyle} />
@@ -110,6 +130,13 @@ const CommandMap: React.FC<CommandMapProps> = ({ surgeHeight, pings = [], setStr
         {pings.map(ping => (
           <Marker key={ping.id} position={[ping.lat, ping.lng]} icon={getPingIcon(ping.status)} />
         ))}
+
+        {/* FR Self Selection Pin */}
+        {frLocation && (
+          <Marker position={frLocation} icon={frSelfIcon}>
+            <Popup>Your Selected Location</Popup>
+          </Marker>
+        )}
 
         {/* Safe Evacuation Camp Pin */}
         <Marker position={activeBasin.safeCampPoint} icon={campIcon}>

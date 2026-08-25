@@ -19,14 +19,19 @@ const FieldResponderRoute: React.FC = () => {
   const activeBasin = basinRegistry[selectedBasinId] || basinRegistry['brahmaputra'];
 
   const [dismissedAlert, setDismissedAlert] = useState(false);
+  const [frLocation, setFrLocation] = useState<[number, number] | null>(null);
 
   const sendPing = async (status: 'SAFE' | 'STRANDED') => {
+    if (!frLocation) {
+      alert('Please tap the map to drop your location pin first.');
+      return;
+    }
     try {
       await addDoc(collection(db, 'responderStatus'), {
         id: `Unit-${Math.floor(Math.random() * 900) + 100}`,
         status,
-        lat: activeBasin.center[0] + (Math.random() - 0.5) * 0.04,
-        lng: activeBasin.center[1] + (Math.random() - 0.5) * 0.04,
+        lat: frLocation[0],
+        lng: frLocation[1],
         timestamp: serverTimestamp()
       });
     } catch (e) {
@@ -38,7 +43,15 @@ const FieldResponderRoute: React.FC = () => {
 
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative' }}>
-      <CommandMap surgeHeight={surgeHeight} pings={pings} setStrandedPop={setStrandedPop} theme={theme} activeBasin={activeBasin} />
+      <CommandMap 
+        surgeHeight={surgeHeight} 
+        pings={pings} 
+        setStrandedPop={setStrandedPop} 
+        theme={theme} 
+        activeBasin={activeBasin} 
+        onMapClick={(lat, lng) => setFrLocation([lat, lng])}
+        frLocation={frLocation}
+      />
       
       {/* Top Left View Label */}
       <div style={{ 

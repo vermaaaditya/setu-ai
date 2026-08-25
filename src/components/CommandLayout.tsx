@@ -62,7 +62,12 @@ const CommandLayout: React.FC = () => {
       const unsub = onSnapshot(q, (snapshot) => {
         const loadedPings: ResponderPing[] = [];
         snapshot.forEach((doc) => {
-          loadedPings.push({ ...doc.data(), id: doc.id } as ResponderPing);
+          const data = doc.data();
+          let parsedUnitId = data.id || '';
+          if (!parsedUnitId.startsWith('Unit-') && !parsedUnitId.startsWith('Citizen-')) {
+            parsedUnitId = `Unit ${doc.id.substring(0, 4).toUpperCase()}`;
+          }
+          loadedPings.push({ ...data, id: doc.id, docId: doc.id, unitId: parsedUnitId } as any);
         });
         setPings(loadedPings);
       });
@@ -165,13 +170,13 @@ const CommandLayout: React.FC = () => {
             {pings.map(ping => (
               <div key={ping.id} style={{ marginBottom: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
-                  [{new Date(ping.timestamp?.seconds * 1000).toLocaleTimeString() || 'LIVE'}] {(ping as any).unitName || ping.id}{' '}
+                  [{new Date(ping.timestamp?.seconds * 1000).toLocaleTimeString() || 'LIVE'}] {(ping as any).unitName || (ping as any).unitId}{' '}
                   <span style={{ color: ping.status === 'SAFE' ? 'var(--responder-green)' : 'var(--responder-red)', fontWeight: 'bold' }}>
                     {ping.status}
                   </span>
                 </div>
                 <button 
-                  onClick={() => handleResolvePing(ping.id)}
+                  onClick={() => handleResolvePing((ping as any).docId || ping.id)}
                   style={{ padding: '2px 6px', backgroundColor: 'rgba(52, 211, 153, 0.15)', color: 'var(--responder-green)', border: '1px solid var(--responder-green)', borderRadius: '3px', cursor: 'pointer', fontSize: '10px', fontWeight: 'bold' }}
                   title="Mark Rescued / Clear Signal"
                 >
