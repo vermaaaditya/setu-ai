@@ -4,10 +4,12 @@ import { MapContainer, TileLayer, Marker, Polyline, Popup, useMapEvents } from '
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { basinRegistry } from '../data/basinRegistry';
+import { CitizenChatbot } from '../components/CitizenChatbot';
 
 interface ContextType {
   theme: 'dark' | 'light';
   selectedBasinId: string;
+  surgeHeight: number;
 }
 
 function LocationPicker({ position, setPosition }: { position: [number, number], setPosition: (pos: [number, number]) => void }) {
@@ -45,7 +47,7 @@ function getDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number) {
 }
 
 const NavigationRoute: React.FC = () => {
-  const { selectedBasinId, theme } = useOutletContext<ContextType>();
+  const { selectedBasinId, theme, surgeHeight } = useOutletContext<ContextType>();
   const activeBasin = basinRegistry[selectedBasinId] || basinRegistry['brahmaputra'];
 
   const [userLocation, setUserLocation] = useState<[number, number]>(activeBasin.center);
@@ -141,6 +143,7 @@ const NavigationRoute: React.FC = () => {
         </a>
       </div>
 
+      <CitizenChatbot lat={userLocation[0]} lng={userLocation[1]} activeBasinName={activeBasin.name} surgeHeight={surgeHeight} />
     </div>
   );
 };

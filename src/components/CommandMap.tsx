@@ -1,5 +1,5 @@
 import React, { useMemo, useEffect, useState, useDeferredValue } from 'react';
-import { MapContainer, TileLayer, GeoJSON, Marker, Polyline, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, GeoJSON, Marker, Polyline, Popup, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -30,7 +30,7 @@ function MapRecenter({ center, zoom }: { center: [number, number], zoom: number 
 // Map Click Handler for Field Responder
 function MapClickHandler({ onMapClick }: { onMapClick?: (lat: number, lng: number) => void }) {
   useMapEvents({
-    click(e) {
+    click(e: any) {
       if (onMapClick) onMapClick(e.latlng.lat, e.latlng.lng);
     }
   });

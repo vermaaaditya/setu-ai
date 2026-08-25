@@ -86,3 +86,40 @@ export async function generateManifestPDF(surgeHeight: number, strandedPop: numb
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
+
+export async function chatWithGroq(
+  messages: { role: 'user' | 'assistant', content: string }[],
+  liveContext: { activeBasinName: string, surgeHeight: number, weatherText: string }
+): Promise<string> {
+  if (!import.meta.env.VITE_GROQ_API_KEY) {
+    return "API key not configured. Fallback: Please move to higher ground and wait for official updates.";
+  }
+
+  const systemPrompt = `You are a helpful, concise citizen safety assistant for a flood disaster response app. 
+Answer only questions about current weather conditions, flood risk, and basic safety guidance (what to do if stranded, when to evacuate, what NDRF/authorities recommend). 
+If asked anything unrelated, politely redirect to weather or flood safety topics.
+Keep your answers brief, friendly, and practical (max 2-3 short sentences).
+
+Live Context:
+- Sector: ${liveContext.activeBasinName}
+- Current Flood Surge Level: +${liveContext.surgeHeight} meters
+- Local Weather: ${liveContext.weatherText || 'Data temporarily unavailable'}
+`;
+
+  try {
+    const response = await groq.chat.completions.create({
+      messages: [
+        { role: 'system', content: systemPrompt },
+        ...messages
+      ],
+      model: 'llama-3.1-8b-instant', // Fast conversational model
+      max_tokens: 150,
+      temperature: 0.5
+    });
+    
+    return response.choices[0]?.message?.content?.trim() || "I'm having trouble retrieving information right now. Please prioritize your safety and move to high ground.";
+  } catch (error) {
+    console.error("Groq Chat API Error:", error);
+    return "I'm currently unable to connect to the safety network. Please follow standard evacuation protocols and move to higher ground.";
+  }
+}

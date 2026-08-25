@@ -6,6 +6,7 @@ import 'leaflet/dist/leaflet.css';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { basinRegistry } from '../data/basinRegistry';
+import { CitizenChatbot } from '../components/CitizenChatbot';
 
 interface ContextType {
   surgeHeight: number;
@@ -363,6 +364,7 @@ const CivilianPublicRoute: React.FC = () => {
         </div>
       </aside>
 
+      <CitizenChatbot lat={pinPosition[0]} lng={pinPosition[1]} activeBasinName={activeBasin.name} surgeHeight={surgeHeight} />
     </div>
   );
 };
