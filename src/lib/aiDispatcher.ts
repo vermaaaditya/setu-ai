@@ -88,11 +88,15 @@ Live Context:
         ...messages
       ],
       model: 'qwen/qwen3.6-27b', // Valid model available on this API key
-      max_tokens: 150,
+      max_tokens: 1024,
       temperature: 0.5
     });
     
-    return response.choices[0]?.message?.content?.trim() || "I'm having trouble retrieving information right now. Please prioritize your safety and move to high ground.";
+    let rawText = response.choices[0]?.message?.content || "";
+    // Remove <think> blocks including their contents, even if unclosed
+    rawText = rawText.replace(/<think>[\s\S]*?(<\/think>|$)/gi, '').trim();
+    
+    return rawText || "I'm having trouble retrieving information right now. Please prioritize your safety and move to high ground.";
   } catch (error) {
     console.error("Groq Chat API Error:", error);
     return "I'm currently unable to connect to the safety network. Please follow standard evacuation protocols and move to higher ground.";
