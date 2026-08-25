@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { doc, onSnapshot, collection, query, orderBy, limit, deleteDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { generateDispatch, speakText, generateManifestPDF } from '../lib/aiDispatcher';
@@ -15,6 +15,7 @@ export interface ResponderPing {
 }
 
 const CommandLayout: React.FC = () => {
+  const location = useLocation();
   const [surgeHeight, setSurgeHeight] = useState<number>(0);
   const [pings, setPings] = useState<ResponderPing[]>([]);
   const [strandedPop, setStrandedPop] = useState(0);
@@ -110,7 +111,8 @@ const CommandLayout: React.FC = () => {
         <Outlet context={{ surgeHeight, pings, setStrandedPop, theme, selectedBasinId }} />
       </main>
 
-      <aside className={styles.telemetryPanel}>
+      {location.pathname === '/hq' && (
+        <aside className={styles.telemetryPanel}>
         <h2 style={{ color: 'var(--text-muted)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px' }}>
           Live Telemetry
         </h2>
@@ -208,7 +210,8 @@ const CommandLayout: React.FC = () => {
             DOWNLOAD PDF MANIFEST
           </button>
         </div>
-      </aside>
+        </aside>
+      )}
 
       {/* NATIONAL DISASTER SECTOR SELECTION MODAL */}
       {showSectorModal && (
