@@ -12,36 +12,11 @@ export async function generateDispatch(
   strandedPop: number, 
   lang: 'en-US' | 'hi-IN'
 ): Promise<string> {
-  if (!import.meta.env.VITE_GROQ_API_KEY) {
-    console.warn("No Groq API key found. Using fallback text.");
-    return lang === 'en-US' 
-      ? `Alert. Flood surge level is ${surgeHeight} meters. Estimated ${strandedPop} individuals stranded. Deploy NDRF units now.`
-      : `चेतावनी। जल स्तर ${surgeHeight} मीटर है। ${strandedPop} लोग फंसे हैं। बचाव दल तुरंत भेजें।`;
-  }
-
-  try {
-    const response = await groq.chat.completions.create({
-      messages: [
-        {
-          role: 'system',
-          content: 'You are an automated NDRF emergency radio dispatcher. Output ONLY the exact final broadcast text to be spoken over the radio. Maximum 2 short sentences. Absolutely NO preambles, NO markdown, NO asterisks, NO quotes, NO rules, and NO explanations.'
-        },
-        {
-          role: 'user',
-          content: `Broadcast language: ${lang === 'hi-IN' ? 'Hindi' : 'English'}. Current flood surge: ${surgeHeight} meters. Estimated stranded population: ${strandedPop}.`
-        }
-      ],
-      model: 'qwen/qwen3.6-27b',
-    });
-    let raw = response.choices[0]?.message?.content || 'Dispatch generated.';
-    // Clean all markdown, quotes, and common LLM preamble prefixes
-    raw = raw.replace(/[*#_~`"']/g, '');
-    raw = raw.replace(/^(here is|dispatch|alert|broadcast|warning|note|critical rules):?/gi, '');
-    return raw.trim();
-  } catch (error) {
-    console.error("Groq API Error:", error);
-    return 'Error generating dispatch with Groq.';
-  }
+  // Voice dispatch now strictly uses deterministic fallback text as requested.
+  // Groq API is reserved exclusively for the Citizen Chatbot.
+  return lang === 'en-US' 
+    ? `Alert. Flood surge level is ${surgeHeight} meters. Estimated ${strandedPop} individuals stranded. Deploy NDRF units now.`
+    : `चेतावनी। जल स्तर ${surgeHeight} मीटर है। ${strandedPop} लोग फंसे हैं। बचाव दल तुरंत भेजें।`;
 }
 
 export function speakText(text: string, lang: 'en-US' | 'hi-IN') {
