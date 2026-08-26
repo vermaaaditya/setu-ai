@@ -86,12 +86,17 @@ const CommandMap: React.FC<CommandMapProps> = ({ surgeHeight, pings = [], setStr
     iconAnchor: [14, 14]
   });
 
-  const getPingIcon = (status: string) => new L.DivIcon({
-    className: '',
-    html: `<div class="${styles.arrivalPin} ${status === 'SAFE' ? styles.safe : styles.stranded}"></div>`,
-    iconSize: [24, 24],
-    iconAnchor: [12, 12]
-  });
+  const getPingIcon = (ping: any) => {
+    let statusClass = ping.status === 'SAFE' ? styles.safe : styles.stranded;
+    if (ping.needsMedical) statusClass = styles.medical;
+
+    return new L.DivIcon({
+      className: '',
+      html: `<div class="${styles.arrivalPin} ${statusClass}"></div>`,
+      iconSize: [24, 24],
+      iconAnchor: [12, 12]
+    });
+  };
 
   const frSelfIcon = new L.DivIcon({
     className: '',
@@ -128,7 +133,7 @@ const CommandMap: React.FC<CommandMapProps> = ({ surgeHeight, pings = [], setStr
 
         {/* Responder Pins */}
         {pings.map(ping => (
-          <Marker key={ping.id} position={[ping.lat, ping.lng]} icon={getPingIcon(ping.status)} />
+          <Marker key={ping.id} position={[ping.lat, ping.lng]} icon={getPingIcon(ping)} />
         ))}
 
         {/* FR Self Selection Pin */}

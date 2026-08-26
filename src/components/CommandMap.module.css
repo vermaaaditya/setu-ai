@@ -63,6 +63,7 @@
 }
 .arrivalPin.safe::after { background-color: var(--responder-green); }
 .arrivalPin.stranded::after { background-color: var(--responder-red); }
+.arrivalPin.medical::after { background-color: #D946EF; }
 
 .arrivalPin::before {
   content: '';
@@ -77,6 +78,10 @@
 }
 .arrivalPin.safe::before { border: 2px solid var(--responder-green); }
 .arrivalPin.stranded::before { border: 2px solid var(--responder-red); }
+.arrivalPin.medical::before { 
+  border: 2px solid #D946EF; 
+  animation: pingPulse 1s cubic-bezier(0, 0.2, 0.8, 1) infinite; 
+}
 
 @keyframes sweep {
   0% { transform: scale(1); opacity: 1; border-width: 4px; }

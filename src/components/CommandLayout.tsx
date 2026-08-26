@@ -12,6 +12,7 @@ export interface ResponderPing {
   timestamp: any;
   lat: number;
   lng: number;
+  needsMedical?: boolean;
 }
 
 const CommandLayout: React.FC = () => {
@@ -190,6 +191,11 @@ const CommandLayout: React.FC = () => {
                   <span style={{ color: ping.status === 'SAFE' ? 'var(--responder-green)' : 'var(--responder-red)', fontWeight: 'bold' }}>
                     {ping.status}
                   </span>
+                  {ping.needsMedical && (
+                    <div style={{ color: '#D946EF', fontWeight: 'bold', fontSize: '11px', marginTop: '4px' }}>
+                      ⚠️ Urgent medical service needed
+                    </div>
+                  )}
                 </div>
                 <button 
                   onClick={() => handleResolvePing((ping as any).docId || ping.id)}
