@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
-import { doc, onSnapshot, collection, query, orderBy, limit, deleteDoc } from 'firebase/firestore';
+import { doc, onSnapshot, collection, query, orderBy, limit, deleteDoc, setDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { generateDispatch, speakText, generateManifestPDF } from '../lib/aiDispatcher';
 import { basinRegistry } from '../data/basinRegistry';
@@ -41,12 +41,28 @@ const CommandLayout: React.FC = () => {
     setIsDispatching(false);
   };
 
-  // Firebase Sync: Surge Height
+  const handleSurgeChange = async (newVal: number) => {
+    setSurgeHeight(newVal);
+    try {
+      await setDoc(doc(db, 'commandState', 'global'), { surgeHeightInMeters: newVal }, { merge: true });
+    } catch (e) {}
+  };
+
+  const handleBasinChange = async (newId: string) => {
+    setSelectedBasinId(newId);
+    try {
+      await setDoc(doc(db, 'commandState', 'global'), { activeBasinId: newId }, { merge: true });
+    } catch (e) {}
+  };
+
+  // Firebase Sync: Surge Height & Basin
   useEffect(() => {
     try {
       const unsub = onSnapshot(doc(db, 'commandState', 'global'), (docSnap) => {
         if (docSnap.exists()) {
-          setSurgeHeight(docSnap.data().surgeHeightInMeters || 0);
+          const data = docSnap.data();
+          if (data.surgeHeightInMeters !== undefined) setSurgeHeight(data.surgeHeightInMeters);
+          if (data.activeBasinId) setSelectedBasinId(data.activeBasinId);
         }
       });
       return () => unsub();
@@ -131,7 +147,7 @@ const CommandLayout: React.FC = () => {
             type="range" 
             min="0" max="15" step="1" 
             value={surgeHeight} 
-            onChange={e => setSurgeHeight(parseInt(e.target.value))}
+            onChange={e => handleSurgeChange(parseInt(e.target.value))}
             style={{ width: '100%' }}
           />
         </div>
@@ -149,7 +165,7 @@ const CommandLayout: React.FC = () => {
           </div>
           <select 
             value={selectedBasinId} 
-            onChange={(e) => setSelectedBasinId(e.target.value)}
+            onChange={(e) => handleBasinChange(e.target.value)}
             style={{ width: '100%', padding: '8px', backgroundColor: 'var(--bg-base)', color: 'var(--text-primary)', border: '1px solid var(--grid-line)' }}
           >
             {Object.values(basinRegistry).map(b => (
@@ -244,7 +260,7 @@ const CommandLayout: React.FC = () => {
                 <div 
                   key={basin.id}
                   onClick={() => {
-                    setSelectedBasinId(basin.id);
+                    handleBasinChange(basin.id);
                     setShowSectorModal(false);
                   }}
                   style={{
