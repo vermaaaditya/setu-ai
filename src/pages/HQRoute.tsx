@@ -8,12 +8,13 @@ import { basinRegistry } from '../data/basinRegistry';
 interface ContextType {
   surgeHeight: number;
   pings: any[];
+  setStrandedPop: (val: number) => void;
   theme: 'dark' | 'light';
   selectedBasinId: string;
 }
 
 const HQRoute: React.FC = () => {
-  const { surgeHeight, pings, theme, selectedBasinId } = useOutletContext<ContextType>();
+  const { surgeHeight, pings, setStrandedPop, theme, selectedBasinId } = useOutletContext<ContextType>();
   const activeBasin = basinRegistry[selectedBasinId] || basinRegistry['brahmaputra'];
 
   const { floodedPolygons } = useMemo(() => {
@@ -22,7 +23,7 @@ const HQRoute: React.FC = () => {
 
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative' }}>
-      <CommandMap surgeHeight={surgeHeight} pings={pings} theme={theme} activeBasin={activeBasin} />
+      <CommandMap surgeHeight={surgeHeight} pings={pings} theme={theme} activeBasin={activeBasin} setStrandedPop={setStrandedPop} />
       
       {/* Absolute positioned HQ label over map */}
       <div style={{ 
